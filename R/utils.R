@@ -31,3 +31,14 @@ logistic_2 <- function(log_lux, p1, p2) {
 ed <- function(edx, p1, p2) {
   return(10^(p1 * (-1 + 1 / (1 - edx))^(1 / p2)))
 }
+
+#' Logit function
+#'
+#' @param y a value between 0 and 1
+#'
+#' @return an unbounded value
+#'
+#' @examples
+logit <- function(y) {
+  return(log(y / (1 - y)))
+}
