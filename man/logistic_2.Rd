@@ -4,12 +4,12 @@
 \alias{logistic_2}
 \title{Two-parameter dose-response logistic curve}
 \usage{
-logistic_2(log_lux, log_ed50, p2)
+logistic_2(log_lux, p1, p2)
 }
 \arguments{
 \item{log_lux}{a log lux value}
 
-\item{log_ed50}{the log of the ed50 lux}
+\item{p1}{the log of the ed50 lux}
 
 \item{p2}{a positive shape parameter}
 }
