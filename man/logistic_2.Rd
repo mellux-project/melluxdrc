@@ -14,10 +14,10 @@ logistic_2(log_lux, p1, p2)
 \item{p2}{a positive shape parameter}
 }
 \value{
-
+a melatonin suppression value between 0 and 1
 }
 \description{
-Returns a melatonin suppression response for a given level of log_lux
+Yields a melatonin suppression response for a given level of log_lux
 }
 \examples{
 # below returns 0.5 since log_lux=log_ed50

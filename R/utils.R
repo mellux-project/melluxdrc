@@ -1,12 +1,12 @@
 #' Two-parameter dose-response logistic curve
 #'
-#' Returns a melatonin suppression response for a given level of log_lux
+#' Yields a melatonin suppression response for a given level of log_lux
 #'
 #' @param log_lux a log lux value
 #' @param p1 the log of the ed50 lux
 #' @param p2 a positive shape parameter
 #'
-#' @return
+#' @return a melatonin suppression value between 0 and 1
 #' @export
 #'
 #' @examples
@@ -18,11 +18,11 @@ logistic_2 <- function(log_lux, p1, p2) {
 
 #' Calculates ed for a given quantile
 #'
-#' @param edx a quantile in [0, 1]
+#' @param edx a quantile between 0 and 1
 #' @param p1 the log of the ed50 lux
 #' @param p2 a positive shape parameter
 #'
-#' @return
+#' @return yields a lux value
 #' @export
 #'
 #' @examples

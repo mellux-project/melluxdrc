@@ -7,14 +7,14 @@
 ed(edx, p1, p2)
 }
 \arguments{
-\item{edx}{a quantile in \link{0, 1}}
+\item{edx}{a quantile between 0 and 1}
 
 \item{p1}{the log of the ed50 lux}
 
 \item{p2}{a positive shape parameter}
 }
 \value{
-
+yields a lux value
 }
 \description{
 Calculates ed for a given quantile
