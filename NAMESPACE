@@ -3,3 +3,4 @@
 export(ed)
 export(logistic_2)
 export(logistic_noise)
+importFrom(magrittr,"%>%")

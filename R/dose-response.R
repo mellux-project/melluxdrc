@@ -22,3 +22,37 @@ logistic_noise <- function(sigma, p1, p2,
   df <- dplyr::tibble(lux=10^log_lux, y=y_noise)
   return(df)
 }
+
+#' Samples values of pairs of logistic_2 dose-response parameters using models fit to Phillips et al. (2017) estimates
+#'
+#' Creates a set of dose-response curves -- one per individual -- supposed to mimic participants in an experiment.
+#' This is based on Bayesian models fit to parameter estimates from Phillips et al., (2017).
+#'
+#' @param n the number of individual dose-response curves to generate
+#' @param alpha posteriors draws for the intercept in the regression of log_p2 on p1
+#' @param beta posterior draws for slope parameter in the regression of log_p2 on p1
+#' @param sigma0 posterior draws for the constant noise term in the regression of log_p2 on p1
+#' @param sigma1 posterior draws for the heteroscedastic noise term in the regression of log_p2 on p1
+#' @param cdf_inv inverse cumulative density function for distribution of p1 observed in Phillips et al., (2017)
+#'
+#' @return a tibble of p1 and p2 values for each individual dose-response curve
+#' @importFrom magrittr "%>%"
+sample_p1_p2 <- function(n, alpha, beta, sigma0, sigma1, cdf_inv) {
+  ndraws <- length(alpha)
+  idx <- sample(ndraws, n, replace = T)
+  p1 <- vector(length = n)
+  p2_log <- vector(length = n)
+  for(i in 1:n) {
+    a_idx <- idx[i]
+    a_alpha <- alpha[a_idx]
+    a_beta <- beta[a_idx]
+    a_sigma0 <- sigma0[a_idx]
+    a_sigma1 <- sigma1[a_idx]
+    p1[i] <- f_sample_n(n=1, cdf_inv)
+    p2_log[i] <- stats::rnorm(1, a_alpha + a_beta * p1[i], a_sigma0 + a_sigma1 * p1[i])
+  }
+  df <- dplyr::tibble(p1=p1, p2_log=p2_log) %>%
+    dplyr::mutate(p2=10^p2_log) %>%
+    dplyr::select(-p2_log)
+  return(df)
+}
