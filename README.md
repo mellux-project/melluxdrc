@@ -20,10 +20,15 @@ install_github("ben18785/chronodoseresponse")
 Example
 -------
 
-This is a basic example which shows you how to solve a common problem:
+This shows how to generate simulated experimental dose-response data, then plots it.
 
 ``` r
 library(chronodoseresponse)
-# generate dose-response data for n=200 individuals measured at four lux levels
-experimental_data <- virtual_experiment(n=200, lux=c(1, 10, 100, 1000))
+# generate dose-response data for 41 individuals measured at four lux levels
+experimental_data <- virtual_experiment(n=41, lux=c(1, 10, 100, 1000))
+
+# plot data
+plot_doseresponse(experimental_data)
 ```
+
+<img src="man/figures/README-example-1.png" width="100%" />

@@ -22,4 +22,7 @@ Imports:
     purrr,
     magrittr,
     KernSmooth,
-    tidyr
+    tidyr,
+    ggplot2,
+    scales,
+    rlang
