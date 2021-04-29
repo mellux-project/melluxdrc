@@ -17,6 +17,33 @@
 #'   \item{p2_l}{5% confidence interval estimate for p2}
 #'   \item{p2_u}{95% confidence interval estimate for p2}
 #'   \item{rmse}{Root mean squared error for individual}
+#'   \item{ed_25}{25% ed}
+#'   \item{ed_75}{75% ed}
 #'   ...
 #' }
 "estimates"
+
+#' Posterior parameter draws for regression model of (log-p2) on p1.
+#'
+#' A Stan model was used to fit a model to the Phillips et al. (2017) point
+#' estimates. The model was of the form:
+#' \deqn{log p2 \sim normal(alpha + beta p1, sigma0 + sigma1 * p1)}
+#'
+#' @references Phillips et al., (2017). High sensitivity and interindividual variability
+#' in the response of the human circadian system to evening light. PNAS.
+#'
+#' @format A list with 4000 parameter draws for each of:
+#' \describe{
+#'   \item{alpha}{intercept parameter}
+#'   \item{beta}{slope parameter}
+#'   \item{sigma0}{noise intercept parameter}
+#'   \item{sigma1}{noise slope parameter}
+#'   ...
+#' }
+"p1_p2_regression_draws"
+
+#' A function representing the inverse-CDF of the p1 estimates from Phillips et al. (2017).
+#'
+#' @references Phillips et al., (2017). High sensitivity and interindividual variability
+#' in the response of the human circadian system to evening light. PNAS.
+"cdf_inv"

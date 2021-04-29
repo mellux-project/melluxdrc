@@ -104,10 +104,3 @@ f_sample_one <- function(cdf_inv) {
 f_sample_n <- function(n, cdf_inv) {
   purrr::map_dbl(1:n, ~f_sample_one(cdf_inv))
 }
-
-# creating cdf_inv so it can be used elsewhere
-a <- KernSmooth::bkde(chronodoseresponse::estimates$p1)
-f <- approxfun(a$x, a$y, method="constant")
-p1_fine <- seq(0, 3.1, 0.01)
-cdf <- purrr::map_dbl(p1_fine, ~f_cdf(., f, 0.0))
-cdf_inv <- approxfun(cdf, p1_fine)

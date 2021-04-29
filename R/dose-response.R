@@ -59,15 +59,15 @@ sample_p1_p2 <- function(n, alpha, beta, sigma0, sigma1, cdf_inv) {
 #'
 #' @param thresh_25 lower bound on simulated ed25 vs observed ed25 (bound calculated as thresh_25 * observed)
 #' @param thresh_75 upper bound on simulated ed75 vs observed ed75 (bound calculated as thresh_75 * observed)
-#' @param eds_25
-#' @param eds_75
+#' @param eds_25 vector of ed25s from estimates from Phillips et al., (2017)
+#' @param eds_75 vector of ed75s from estimates from Phillips et al., (2017)
 #' @param alpha posteriors draws for the intercept in the regression of log_p2 on p1
 #' @param beta posterior draws for slope parameter in the regression of log_p2 on p1
 #' @param sigma0 posterior draws for the constant noise term in the regression of log_p2 on p1
 #' @param sigma1 posterior draws for the heteroscedastic noise term in the regression of log_p2 on p1
 #' @param cdf_inv inverse cumulative density function for distribution of p1 observed in Phillips et al., (2017)
 #'
-#' @return
+#' @return a tibble containing dose-response parameters for an individual
 valid_individual <- function(thresh_25, thresh_75, eds_25, eds_75, alpha, beta, sigma0, sigma1, cdf_inv) {
   lower <- thresh_25 * min(eds_25)
   upper <- thresh_75 * max(eds_75)
@@ -92,18 +92,18 @@ valid_individual <- function(thresh_25, thresh_75, eds_25, eds_75, alpha, beta, 
 virtual_population_generator <- function(n, thresh_25, thresh_75) {
 
   # samples of parameter values
-  alpha <- chronodoseresponse:::p1_p2_regression_draws$alpha
-  beta <- chronodoseresponse:::p1_p2_regression_draws$beta
-  sigma0 <- chronodoseresponse:::p1_p2_regression_draws$sigma0
-  sigma1 <- chronodoseresponse:::p1_p2_regression_draws$sigma1
+  alpha <- chronodoseresponse::p1_p2_regression_draws$alpha
+  beta <- chronodoseresponse::p1_p2_regression_draws$beta
+  sigma0 <- chronodoseresponse::p1_p2_regression_draws$sigma0
+  sigma1 <- chronodoseresponse::p1_p2_regression_draws$sigma1
 
   p1 <- vector(length = n)
   p2 <- vector(length = n)
   for(i in seq_along(p1)) {
     indiv <- valid_individual(thresh_25, thresh_75,
-                              chronodoseresponse:::eds$eds_25,
-                              chronodoseresponse:::eds$eds_75,
-                              alpha, beta, sigma0, sigma1, cdf_inv)
+                              chronodoseresponse::estimates$ed_25,
+                              chronodoseresponse::estimates$ed_75,
+                              alpha, beta, sigma0, sigma1, chronodoseresponse::cdf_inv)
     p1[i] <- indiv$p1[1]
     p2[i] <- indiv$p2[1]
   }

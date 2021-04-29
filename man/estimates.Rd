@@ -14,6 +14,8 @@
 \item{p2_l}{5\% confidence interval estimate for p2}
 \item{p2_u}{95\% confidence interval estimate for p2}
 \item{rmse}{Root mean squared error for individual}
+\item{ed_25}{25\% ed}
+\item{ed_75}{75\% ed}
 ...
 }}
 \usage{

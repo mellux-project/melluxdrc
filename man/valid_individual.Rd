@@ -21,6 +21,10 @@ valid_individual(
 
 \item{thresh_75}{upper bound on simulated ed75 vs observed ed75 (bound calculated as thresh_75 * observed)}
 
+\item{eds_25}{vector of ed25s from estimates from Phillips et al., (2017)}
+
+\item{eds_75}{vector of ed75s from estimates from Phillips et al., (2017)}
+
 \item{alpha}{posteriors draws for the intercept in the regression of log_p2 on p1}
 
 \item{beta}{posterior draws for slope parameter in the regression of log_p2 on p1}
@@ -32,7 +36,7 @@ valid_individual(
 \item{cdf_inv}{inverse cumulative density function for distribution of p1 observed in Phillips et al., (2017)}
 }
 \value{
-
+a tibble containing dose-response parameters for an individual
 }
 \description{
 Generates an individual with reasonable ed25 and ed75 values.
