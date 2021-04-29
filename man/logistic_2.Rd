@@ -4,10 +4,10 @@
 \alias{logistic_2}
 \title{Two-parameter dose-response logistic curve}
 \usage{
-logistic_2(log_lux, p1, p2)
+logistic_2(lux, p1, p2)
 }
 \arguments{
-\item{log_lux}{a log lux value}
+\item{lux}{a lux value}
 
 \item{p1}{the log of the ed50 lux}
 
@@ -17,9 +17,9 @@ logistic_2(log_lux, p1, p2)
 a melatonin suppression value between 0 and 1
 }
 \description{
-Yields a melatonin suppression response for a given level of log_lux
+Yields a melatonin suppression response for a given level of lux
 }
 \examples{
-# below returns 0.5 since log_lux=log_ed50
-logistic_2(10, 10, 5)
+# below returns 0.5 since log10(lux)=log_ed50
+logistic_2(10, 1, 5)
 }

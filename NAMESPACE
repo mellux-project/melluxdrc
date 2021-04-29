@@ -3,5 +3,6 @@
 export(ed)
 export(logistic_2)
 export(logistic_noise)
-export(virtual_population_generator)
+export(virtual_experiment)
+export(virtual_population)
 importFrom(magrittr,"%>%")

@@ -47,3 +47,14 @@
 #' @references Phillips et al., (2017). High sensitivity and interindividual variability
 #' in the response of the human circadian system to evening light. PNAS.
 "cdf_inv"
+
+#' Posterior parameter draws for model of sigma
+#'
+#' The model (a gamma distribution) was fit in Stan.
+#'
+#' @format A list with 800 parameter draws for each of:
+#' \describe{
+#'   \item{a}{gamma parameter 1 in Stan definition of distribution}
+#'   \item{b}{gamma parameter 2 in Stan definition of distribution}
+#' }
+"sigma_fit_draws"

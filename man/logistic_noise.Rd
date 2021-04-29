@@ -4,12 +4,7 @@
 \alias{logistic_noise}
 \title{Generates noisy dose response data at a range of (log-)luxes}
 \usage{
-logistic_noise(
-  sigma,
-  p1,
-  p2,
-  log_lux = log10(c(10, 30, 50, 100, 200, 400, 2000))
-)
+logistic_noise(sigma, p1, p2, lux = c(10, 30, 50, 100, 200, 400, 2000))
 }
 \arguments{
 \item{sigma}{a noise level (represents additive Gaussian noise on logit scale)}
@@ -18,7 +13,7 @@ logistic_noise(
 
 \item{p2}{a positive shape parameter}
 
-\item{log_lux}{a vector of log lux values which defaults to log10(c(10, 30, 50, 100, 200, 400, 2000))}
+\item{lux}{a vector of lux values which defaults to c(10, 30, 50, 100, 200, 400, 2000)}
 }
 \value{
 a tibble of paired lux and melatonin suppression values
