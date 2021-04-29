@@ -11,10 +11,10 @@ The goal of chronodoseresponse is to allow generation of virtual dose-response t
 Installation
 ------------
 
-You can install the released version of chronodoseresponse from [CRAN](https://CRAN.R-project.org) with:
+You can install chronodoseresponse via:
 
 ``` r
-install.packages("chronodoseresponse")
+install_github("ben18785/chronodoseresponse")
 ```
 
 Example
@@ -24,5 +24,6 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(chronodoseresponse)
-## basic example code
+# generate dose-response data for n=200 individuals measured at four lux levels
+experimental_data <- virtual_experiment(n=200, lux=c(1, 10, 100, 1000))
 ```
