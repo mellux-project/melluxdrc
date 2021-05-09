@@ -8,17 +8,20 @@ virtual_experiment(
   n,
   lux = c(10, 30, 50, 100, 200, 400, 2000),
   thresh_25 = 0.5,
-  thresh_75 = 1.5
+  thresh_75 = 1.5,
+  individual_variation_reduction = 1
 )
 }
 \arguments{
-\item{n}{the number of individual dose-response curves to generate}
+\item{n}{number of individual dose-response curves to generate}
 
 \item{lux}{a vector of lux values which defaults to c(10, 30, 50, 100, 200, 400, 2000)}
 
-\item{thresh_25}{lower bound on simulated ed25 vs observed ed25 (bound calculated as thresh_25 * observed) which defaults to 0.5}
+\item{thresh_25}{lower bound on simulated ed25 vs observed ed25 (bound calculated as thresh_25 * observed)}
 
-\item{thresh_75}{upper bound on simulated ed75 vs observed ed75 (bound calculated as thresh_75 * observed) which defaults to 1.5}
+\item{thresh_75}{upper bound on simulated ed75 vs observed ed75 (bound calculated as thresh_75 * observed)}
+
+\item{individual_variation_reduction}{a value (0<=value<=1) which reduces individual variability in dose-response curves}
 }
 \value{
 a tibble containing 'measured' dose-response melatonin curves at each lux value for each individual

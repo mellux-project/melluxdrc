@@ -9,11 +9,8 @@ valid_individual(
   thresh_75,
   eds_25,
   eds_75,
-  alpha,
-  beta,
-  sigma0,
-  sigma1,
-  cdf_inv
+  p1_distribution_parameters,
+  p2_distribution_parameters
 )
 }
 \arguments{
@@ -21,19 +18,20 @@ valid_individual(
 
 \item{thresh_75}{upper bound on simulated ed75 vs observed ed75 (bound calculated as thresh_75 * observed)}
 
-\item{eds_25}{vector of ed25s from estimates from Phillips et al., (2017)}
+\item{eds_25}{vector of ed25s from estimates from Phillips et al. (2017)}
 
-\item{eds_75}{vector of ed75s from estimates from Phillips et al., (2017)}
+\item{eds_75}{vector of ed75s from estimates from Phillips et al. (2017)}
 
-\item{alpha}{posteriors draws for the intercept in the regression of log_p2 on p1}
+\item{p1_distribution_parameters}{a named list of items used to characterise the p1 distribution:
+cdf_full, cdf_inv_full, normal_sigma, weight_full. Here cdf_inv_full and cdf_full are the cdf and inverse-cdf
+characterising the distribution of p1 distribution from Phillips et al. (2017); normal_sigma is the standard
+deviation of the normal distribution used as the narrow mixture component; weight_full is the weight given to the
+p1_distribution derived from Phillips et al. (2017).}
 
-\item{beta}{posterior draws for slope parameter in the regression of log_p2 on p1}
-
-\item{sigma0}{posterior draws for the constant noise term in the regression of log_p2 on p1}
-
-\item{sigma1}{posterior draws for the heteroscedastic noise term in the regression of log_p2 on p1}
-
-\item{cdf_inv}{inverse cumulative density function for distribution of p1 observed in Phillips et al., (2017)}
+\item{p2_distribution_parameters}{a named list of items used to characterise the log_p2|p1 distribution. It comprises:
+alpha posteriors draws for the intercept in the regression of log_p2 on p1; beta posterior draws for slope
+parameter in the regression of log_p2 on p1; sigma0 posterior draws for the constant noise term in the regression of log_p2 on p1;
+posterior draws for the heteroscedastic noise term in the regression of log_p2 on p1.}
 }
 \value{
 a tibble containing dose-response parameters for an individual

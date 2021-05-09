@@ -44,12 +44,55 @@ test_that("logistic_noise: zero noise reduces to logistic curves", {
   expect_equal(untrue, 0)
 })
 
+test_that("cdf_inv_constructor returns a function with reasonable properties", {
+  middle_p1_value <- cdf_inv(0.5)
+  p1_vals <- seq(0, 3.1, 0.01)
+
+  weight <- 1
+  cdf_inv_mixed <- cdf_inv_constructor(weight, cdf, middle_p1_value, 0.05, p1_vals)
+  expect_true(abs(cdf_inv(0.75) - cdf_inv_mixed(0.75)) < 0.1)
+  expect_true(abs(cdf_inv(0.25) - cdf_inv_mixed(0.25)) < 0.1)
+  expect_true(abs(cdf_inv(0.5) - cdf_inv_mixed(0.5)) < 0.1)
+
+  weight <- 0.5
+  cdf_inv_mixed <- cdf_inv_constructor(weight, cdf, middle_p1_value, 0.05, p1_vals)
+  expect_true(cdf_inv(0.75) > cdf_inv_mixed(0.75))
+  expect_true(cdf_inv(0.15) < cdf_inv_mixed(0.25))
+  expect_true(abs(cdf_inv(0.5) - cdf_inv_mixed(0.5)) < 0.1)
+})
+
+test_that("sample_p1_p2 returns (p1, p2) distribution with/without reduced individual variation", {
+  n <- 200
+
+  weight <- 1
+  p1_distribution_parameters <- list(cdf_full = chronodoseresponse::cdf,
+                                     cdf_inv_full = chronodoseresponse::cdf_inv,
+                                     normal_sigma = 0.05,
+                                     weight = weight)
+
+  p2_distribution_parameters <- chronodoseresponse::p1_p2_regression_draws
+  p2_distribution_parameters$weight <- weight
+  p1_p2_full_variation <- sample_p1_p2(n, p1_distribution_parameters, p2_distribution_parameters)
+  expect_equal(nrow(p1_p2_full_variation), n)
+
+  weight <- 0.2
+  p1_distribution_parameters$weight <- weight
+  p2_distribution_parameters$weight <- weight
+  p1_p2_reduced <- sample_p1_p2(n, p1_distribution_parameters, p2_distribution_parameters)
+  expect_true(sd(p1_p2_full_variation$p1) > sd(p1_p2_reduced$p1))
+  expect_true(sd(p1_p2_full_variation$p2) > sd(p1_p2_reduced$p2))
+})
+
 
 test_that("valid_individual returns individual with ed25 and ed75 within thresholds", {
-  alpha <- chronodoseresponse::p1_p2_regression_draws$alpha
-  beta <- chronodoseresponse::p1_p2_regression_draws$beta
-  sigma0 <- chronodoseresponse::p1_p2_regression_draws$sigma0
-  sigma1 <- chronodoseresponse::p1_p2_regression_draws$sigma1
+
+  p1_distribution_parameters <- list(cdf_full = chronodoseresponse::cdf,
+                                    cdf_inv_full = chronodoseresponse::cdf_inv,
+                                    normal_sigma = 0.05,
+                                    weight = 1)
+
+  p2_distribution_parameters <- chronodoseresponse::p1_p2_regression_draws
+  p2_distribution_parameters$weight <- 0.8
 
   eds_25 <- estimates$ed_25
   eds_75 <- estimates$ed_75
@@ -63,7 +106,8 @@ test_that("valid_individual returns individual with ed25 and ed75 within thresho
   count_upper <- 0
   for(i in 1:10) {
     indiv <- valid_individual(thresh_25, thresh_75, eds_25, eds_75,
-                                alpha, beta, sigma0, sigma1, cdf_inv)
+                              p1_distribution_parameters,
+                              p2_distribution_parameters)
     ed_25_sim <- ed(0.25, p1 = indiv$p1[1], p2 = indiv$p2[1])
     ed_75_sim <- ed(0.75, p1 = indiv$p1[1], p2 = indiv$p2[1])
     count_lower <- count_lower + dplyr::if_else(ed_25_sim > lower, 0, 1)
@@ -76,7 +120,7 @@ test_that("valid_individual returns individual with ed25 and ed75 within thresho
 
 test_that("virtual_population generates population of correct size", {
   n <- 10
-  df <- virtual_population(n, 0.1, 2)
+  df <- virtual_population(n, 0.1, 2, 0.5, 0.5, 0.025)
   expect_equal(nrow(df), n)
 })
 
@@ -89,7 +133,7 @@ test_that("virtual_population generates individuals all with ed25s and ed75s wit
   lower <- lower_thres * min(eds_25)
   upper <- upper_thres * max(eds_75)
 
-  df <- virtual_population(n, lower_thres, upper_thres)
+  df <- virtual_population(n, lower_thres, upper_thres, 1, 1, 0.05)
   count_lower <- 0
   count_upper <- 0
   for(i in 1:nrow(df)) {
@@ -138,4 +182,30 @@ test_that("virtual_experiment produces populations with reasonable suppression v
   expect_true(abs(pop_df$`10` - 0.23) < 0.2)
   expect_true(abs(pop_df$`100` - 0.71) < 0.2)
   expect_true(abs(pop_df$`1000` - 0.95) < 0.2)
+})
+
+
+test_that("virtual_experiment allows reduction of individual variation", {
+  # this is mainly just a test that our simulated distribution doesn't change over time
+  pop_df <- virtual_experiment(n=200, lux=c(100, 1000)) %>%
+    dplyr::group_by(lux) %>%
+    dplyr::summarise(y=sd(y)) %>%
+    tidyr::pivot_wider(names_from = lux,
+                       values_from=y) %>%
+    dplyr::mutate(type="full")
+
+  pop_df_reduced <- virtual_experiment(n=200, lux=c(100, 1000),
+                                       individual_variation_reduction=0.1) %>%
+    dplyr::group_by(lux) %>%
+    dplyr::summarise(y=sd(y)) %>%
+    tidyr::pivot_wider(names_from = lux,
+                       values_from=y) %>%
+    dplyr::mutate(type="reduced")
+  pop_df_combined <- pop_df %>%
+    dplyr::bind_rows(pop_df_reduced) %>%
+    tidyr::pivot_longer(c(`100`, `1000`)) %>%
+    tidyr::pivot_wider(id_cols = name,
+                       names_from = type,
+                       values_from=value)
+  expect_equal(mean(pop_df_combined$reduced < pop_df_combined$full), 1)
 })

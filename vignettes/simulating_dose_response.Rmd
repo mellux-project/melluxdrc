@@ -1,0 +1,44 @@
+---
+title: "simulating_dose_response"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{simulating_dose_response}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette describes how to simulate dose-response data as parameterised using estimates from Phillips et al. (2017).
+
+Here, we simulate dose-response data for 41 individuals measured at four lux levels.
+```{r setup}
+library(chronodoseresponse)
+library(dplyr)
+
+# generate data
+lux <- c(1, 10, 100, 1000)
+n <- 41
+experimental_data <- virtual_experiment(n=n, lux=lux)
+
+# look at it
+glimpse(experimental_data)
+```
+
+The package also contains methods for visualising such data
+```{r}
+plot_doseresponse(experimental_data)
+```
+
+The estimates from Phillips et al. (2017) exhibited substantial inter-individual variability in individuals' response to light. Built into the package, we allow this individual variation to be reduced.
+```{r}
+experimental_data <- virtual_experiment(n=n, lux=lux,
+                                        individual_variation_reduction=0.05)
+plot_doseresponse(experimental_data)
+```
+

@@ -42,6 +42,12 @@
 #' }
 "p1_p2_regression_draws"
 
+#' A function representing the CDF of the p1 estimates from Phillips et al. (2017).
+#'
+#' @references Phillips et al., (2017). High sensitivity and interindividual variability
+#' in the response of the human circadian system to evening light. PNAS.
+"cdf"
+
 #' A function representing the inverse-CDF of the p1 estimates from Phillips et al. (2017).
 #'
 #' @references Phillips et al., (2017). High sensitivity and interindividual variability

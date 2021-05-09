@@ -13,7 +13,9 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.2
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
 Depends: 
     R (>= 2.10)
@@ -26,3 +28,4 @@ Imports:
     ggplot2,
     scales,
     rlang
+VignetteBuilder: knitr
