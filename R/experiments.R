@@ -67,6 +67,9 @@ is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit, p_value)
     if(mean(vals_2) < mean(vals_1))
       if(fit$p.value < p_value)
         res <- 1
+  } else { # correct detection means no difference detected
+    if(fit$p.value > p_value)
+      res <- 1
   }
   res
 }

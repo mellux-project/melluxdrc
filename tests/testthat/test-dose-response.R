@@ -61,6 +61,23 @@ test_that("cdf_inv_constructor returns a function with reasonable properties", {
   expect_true(abs(cdf_inv(0.5) - cdf_inv_mixed(0.5)) < 0.1)
 })
 
+test_that("treated_p1 results in proportional change in ed50", {
+  fraction <- 0.75
+  old_p1 <- 2
+  old_ed50 <- ed(0.5, old_p1, 3)
+  expect_equal(ed(0.5, treated_p1(fraction, old_p1), 3), old_ed50 * fraction)
+
+  fraction <- 2
+  old_p1 <- 2
+  old_ed50 <- ed(0.5, old_p1, 3)
+  expect_equal(ed(0.5, treated_p1(fraction, old_p1), 3), old_ed50 * fraction)
+
+  fraction <- 1
+  old_p1 <- 2
+  old_ed50 <- ed(0.5, old_p1, 3)
+  expect_equal(ed(0.5, treated_p1(fraction, old_p1), 3), old_ed50 * fraction)
+})
+
 test_that("sample_p1_p2 returns (p1, p2) distribution with/without reduced individual variation", {
   n <- 200
 
@@ -186,7 +203,6 @@ test_that("virtual_experiment produces populations with reasonable suppression v
 
 
 test_that("virtual_experiment allows reduction of individual variation", {
-  # this is mainly just a test that our simulated distribution doesn't change over time
   pop_df <- virtual_experiment(n=200, lux=c(100, 1000)) %>%
     dplyr::group_by(lux) %>%
     dplyr::summarise(y=sd(y)) %>%
@@ -208,4 +224,96 @@ test_that("virtual_experiment allows reduction of individual variation", {
                        names_from = type,
                        values_from=value)
   expect_equal(mean(pop_df_combined$reduced < pop_df_combined$full), 1)
+})
+
+test_that("virtual_experiment allows change in suppression from treatment", {
+  pop_df <- virtual_experiment(n=200, lux=c(20, 100)) %>%
+    dplyr::group_by(lux) %>%
+    dplyr::summarise(y=median(y)) %>%
+    tidyr::pivot_wider(names_from = lux,
+                       values_from=y) %>%
+    dplyr::mutate(type="full")
+
+  pop_df_treated <- virtual_experiment(n=200, lux=c(20, 100),
+                                       treated_ed50_multiplier=0.5) %>%
+    dplyr::group_by(lux) %>%
+    dplyr::summarise(y=median(y)) %>%
+    tidyr::pivot_wider(names_from = lux,
+                       values_from=y) %>%
+    dplyr::mutate(type="treated")
+
+  pop_df_combined <- pop_df %>%
+    dplyr::bind_rows(pop_df_treated) %>%
+    tidyr::pivot_longer(c(`20`, `100`)) %>%
+    tidyr::pivot_wider(id_cols = name,
+                       names_from = type,
+                       values_from=value)
+  expect_equal(mean(pop_df_combined$treated > pop_df_combined$full), 1)
+})
+
+test_that("virtual_experiment allows reduction of individual variation with treatment", {
+  pop_df <- virtual_experiment(n=200, lux=c(100, 1000), treated_ed50_multiplier=0.5) %>%
+    dplyr::group_by(lux) %>%
+    dplyr::summarise(y=sd(y)) %>%
+    tidyr::pivot_wider(names_from = lux,
+                       values_from=y) %>%
+    dplyr::mutate(type="full")
+
+  pop_df_reduced <- virtual_experiment(n=200, lux=c(100, 1000),
+                                       individual_variation_reduction=0.1,
+                                       treated_ed50_multiplier=0.5) %>%
+    dplyr::group_by(lux) %>%
+    dplyr::summarise(y=sd(y)) %>%
+    tidyr::pivot_wider(names_from = lux,
+                       values_from=y) %>%
+    dplyr::mutate(type="reduced")
+  pop_df_combined <- pop_df %>%
+    dplyr::bind_rows(pop_df_reduced) %>%
+    tidyr::pivot_longer(c(`100`, `1000`)) %>%
+    tidyr::pivot_wider(id_cols = name,
+                       names_from = type,
+                       values_from=value)
+  expect_equal(mean(pop_df_combined$reduced < pop_df_combined$full), 1)
+})
+
+test_that("virtual_within_treatment_experiment measures before and after treatment", {
+  nindiv <- 200
+  test <- virtual_within_treatment_experiment(nindiv, treated_ed50_multiplier=0.5)
+  n_lux <- dplyr::n_distinct(test$lux)
+  expect_equal(nrow(test), 2 * nindiv * n_lux)
+  expect_equal(sum(test$treated) / dplyr::n_distinct(test$lux), nindiv)
+
+  df_summary <- test %>%
+    dplyr::group_by(treated, lux) %>%
+    dplyr::summarise(y=mean(y), .groups="drop") %>%
+    tidyr::pivot_wider(id_cols=lux, names_from=treated,
+                       values_from=y)
+  expect_true(mean(df_summary$`TRUE` > df_summary$`FALSE`) > 0.7) # arbitrary cutoff
+})
+
+test_that("virtual_within_treatment_experiment works fine with individual variance reducer", {
+  nindiv <- 200
+  test <- virtual_within_treatment_experiment(nindiv, treated_ed50_multiplier=0.5) %>%
+    dplyr::mutate(type="full")
+  n_lux <- dplyr::n_distinct(test$lux)
+  expect_equal(nrow(test), 2 * nindiv * n_lux)
+  expect_equal(sum(test$treated) / dplyr::n_distinct(test$lux), nindiv)
+  test_lower <- virtual_within_treatment_experiment(nindiv, treated_ed50_multiplier=0.5,
+                                                    individual_variation_reduction=0.5) %>%
+    dplyr::mutate(type="reduced")
+  n_lux <- dplyr::n_distinct(test_lower$lux)
+  expect_equal(nrow(test_lower), 2 * nindiv * n_lux)
+  expect_equal(sum(test_lower$treated) / dplyr::n_distinct(test_lower$lux), nindiv)
+
+  df_summary <- test %>%
+    dplyr::bind_rows(test_lower) %>%
+    dplyr::group_by(type, treated, lux) %>%
+    dplyr::summarise(mu=mean(y), sigma=sd(y), .groups="drop") %>%
+    tidyr::pivot_wider(id_cols=lux, names_from=c(type, treated),
+                       values_from=c(mu, sigma))
+  thresh <- 0.7 # arbitrary cutoff
+  expect_true(mean(df_summary$mu_full_TRUE > df_summary$mu_full_FALSE) > thresh)
+  expect_true(mean(df_summary$mu_reduced_TRUE > df_summary$mu_reduced_FALSE) > thresh)
+  expect_true(mean(df_summary$sigma_full_TRUE > df_summary$sigma_reduced_TRUE) > thresh)
+  expect_true(mean(df_summary$sigma_full_FALSE > df_summary$sigma_reduced_FALSE) > thresh)
 })

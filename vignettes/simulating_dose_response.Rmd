@@ -23,6 +23,7 @@ Here, we simulate dose-response data for 41 individuals measured at four lux lev
 library(chronodoseresponse)
 library(dplyr)
 library(purrr)
+library(ggplot2)
 
 # generate data
 lux <- c(1, 10, 100, 1000)
@@ -96,5 +97,66 @@ mean(results_b)
 
 results_w <- map_dbl(1:nreps, ~comparison_experiment(FALSE, lux_1, lux_2, nindiv, population_df))
 mean(results_w)
+```
+
+# Experiments involving treatment
+We now illustrate how this library can be used to simulate treatments which shift the natural ed50 of individuals. There are two types of experiments that can be done. One involving two samples of individuals: one treated; one not. Another involving the same individuals whom are measured before and after treatment.
+
+We first illustrate the two sample case with a treatment which decreases the ed50 of individuals by a factor of 2.
+```{r}
+n <- 200
+sample_untreated <- virtual_experiment(n) %>% 
+  mutate(type="untreated")
+sample_treated <- virtual_experiment(n, treated_ed50_multiplier=0.5) %>% 
+  mutate(type="treated")
+sample_combined <- sample_untreated %>% 
+  bind_rows(sample_treated)
+
+sample_combined %>% 
+  ggplot(aes(x=lux, y=y)) +
+  geom_point() +
+  geom_line(aes(group=as.factor(id))) +
+  facet_wrap(~type) +
+  scale_x_log10() +
+  geom_smooth(se=F, method="loess", formula = "y~x") +
+  scale_y_continuous(labels=scales::percent) +
+  xlab("Lux") +
+  ylab("Melatonin suppression")
+```
+
+A note on caution: the model is not able to extrapolate too far away from the measured values of Phillips et al. (2016). If the treatment is too extreme, occasionally, individuals may fall outside our region of confidence. To see this, we include a truncation Boolean which should be checked when doing these treatment-type experiments.
+```{r}
+# ok treatment
+mean(sample_treated$p1_truncated)
+
+# extreme treatment
+sample_treated <- virtual_experiment(n, treated_ed50_multiplier=0.1)
+mean(sample_treated$p1_truncated) > 0
+```
+
+We now show simulated data for individuals whom are measured twice: before and after treatment.
+```{r}
+n <- 9
+sample_treated <- virtual_within_treatment_experiment(n, treated_ed50_multiplier=0.5)
+
+sample_treated %>% 
+  ggplot(aes(x=lux, y=y, colour=treated)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~id) +
+  scale_x_log10() +
+  scale_y_continuous(labels=scales::percent) +
+  xlab("Lux") +
+  ylab("Melatonin suppression")
+
+# check for truncated p1 values
+mean(sample_treated$p1_truncated) > 0
+```
+
+Again it's important to check if treated individuals have parameters resulting in over-extrapolation.
+```{r}
+# extreme treatment
+sample_treated <- virtual_within_treatment_experiment(n, treated_ed50_multiplier=0.01)
+mean(sample_treated$p1_truncated) > 0
 ```
 
