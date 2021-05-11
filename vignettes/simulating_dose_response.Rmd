@@ -64,14 +64,14 @@ lux_2 <- 30
 nindiv <- 5
 nreps <- 30
 is_between <- F
-results <- map_dbl(1:nreps, ~comparison_experiment(is_between, lux_1, lux_2, nindiv, population_df))
+results <- map_dbl(1:nreps, ~comparison_test(is_between, lux_1, lux_2, nindiv, population_df))
 mean(results)
 ```
 
 If we increase the sample size the fraction of successes should increase.
 ```{r}
 nindiv <- 20
-results <- map_dbl(1:nreps, ~comparison_experiment(is_between, lux_1, lux_2, nindiv, population_df))
+results <- map_dbl(1:nreps, ~comparison_test(is_between, lux_1, lux_2, nindiv, population_df))
 mean(results)
 ```
 
@@ -79,7 +79,7 @@ Similarly if we make the two luxes more separated, the fraction of successes inc
 ```{r}
 nindiv <- 5
 lux_2 <- 100
-results <- map_dbl(1:nreps, ~comparison_experiment(is_between, lux_1, lux_2, nindiv, population_df))
+results <- map_dbl(1:nreps, ~comparison_test(is_between, lux_1, lux_2, nindiv, population_df))
 mean(results)
 ```
 
@@ -92,10 +92,10 @@ lux_1 <- 10
 lux_2 <- 30
 nindiv <- 20
 nreps <- 30
-results_b <- map_dbl(1:nreps, ~comparison_experiment(TRUE, lux_1, lux_2, nindiv, population_df))
+results_b <- map_dbl(1:nreps, ~comparison_test(TRUE, lux_1, lux_2, nindiv, population_df))
 mean(results_b)
 
-results_w <- map_dbl(1:nreps, ~comparison_experiment(FALSE, lux_1, lux_2, nindiv, population_df))
+results_w <- map_dbl(1:nreps, ~comparison_test(FALSE, lux_1, lux_2, nindiv, population_df))
 mean(results_w)
 ```
 

@@ -75,7 +75,7 @@ is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit, p_value)
 }
 
 #' Performs between- or within-individual experiments comparing melatonin suppression at two
-#' lux levels
+#' lux levels using t tests
 #'
 #' For a between-individual experiment, a t-test is used to compare the melatonin suppression level at two lux values for two different
 #' samples of individuals. This function requires based an (ideally large) simulated population of individual dose-response data.
@@ -99,18 +99,18 @@ is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit, p_value)
 #' # carry out 10 replicate between-individual experiments comparing lux_1=10 with lux_2=30
 #' # for a test sample size of 20
 #' is_between <- TRUE
-#' results <- purrr::map_dbl(1:10, ~comparison_experiment(is_between, 10, 30, 20, population_df))
+#' results <- purrr::map_dbl(1:10, ~comparison_test(is_between, 10, 30, 20, population_df))
 #'
 #' # calculate percentage of experiments obtaining the correct signed difference
 #' mean(results)
 #' # carry out 10 replicate within-individual experiments comparing lux_1=10 with lux_2=30
 #' # for a test sample size of 20
 #' is_between <- FALSE
-#' results <- purrr::map_dbl(1:10, ~comparison_experiment(is_between, 10, 30, 20, population_df))
+#' results <- purrr::map_dbl(1:10, ~comparison_test(is_between, 10, 30, 20, population_df))
 #'
 #' # calculate percentage of experiments obtaining the correct signed difference
 #' mean(results)
-comparison_experiment <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05) {
+comparison_test <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05) {
 
   vals <- generate_two_samples(is_between, lux_1, lux_2, n, population_df)
   vals_1 <- vals$vals_1
