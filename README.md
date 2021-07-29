@@ -6,7 +6,7 @@ chronodoseresponse
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ben18785/chronodoseresponse/workflows/R-CMD-check/badge.svg)](https://github.com/ben18785/chronodoseresponse/actions) <!-- badges: end -->
 
-The goal of chronodoseresponse is to allow generation of virtual dose-response type data typical in chronobiology experiments.
+The goal of chronodoseresponse is to allow generation of virtual dose-response type data typical in chronobiology experiments. The application is built from data produced in this [modelling analysis](https://github.com/ben18785/chronodoseresponse_model_fitting).
 
 Installation
 ------------
