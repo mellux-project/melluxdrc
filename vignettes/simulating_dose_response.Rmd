@@ -1,5 +1,5 @@
 ---
-title: "simulating_dose_response"
+title: "Simulating dose response data and conducting experiments"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{simulating_dose_response}
@@ -52,7 +52,7 @@ of dose-response type data.
 
 ## Within-subject
 Here, we first illustrate a within-subject experiment, in which the melatonin values for individuals measured at two
-lux levels are compared using a paired t-test. Success of these experiments indicate that the difference in melatonin suppression between the two lux levels is of the correct sign and statistically significant (by default at the 5% level).
+lux levels are compared using a paired t-test. Success of these experiments indicates that the difference in melatonin suppression between the two lux levels is of the correct sign and statistically significant (by default at the 5% level).
 ```{r}
 # first generate large (ideally bigger than this if repeating experiments) virtual population of data
 population_df <- virtual_experiment(n=200)
@@ -86,7 +86,7 @@ mean(results)
 ## Between-subject
 We now illustrate a between-subject experiment, in which two separate samples of individuals have their suppressions
 measured at two different lux levels. Because of individual variation in dose-response curves, these experiments
-tend to be less powerful thatn within-subject experiments.
+tend to be less powerful than within-subject experiments.
 ```{r}
 lux_1 <- 10
 lux_2 <- 30
