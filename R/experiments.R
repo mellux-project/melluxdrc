@@ -193,19 +193,26 @@ generate_two_samples_at_one_lux <- function(is_between, lux, n, population_df) {
   vals_u <- df_untreated$y
   vals_t <- df_treated$y
 
-  list(vals_1=vals_1, vals_2=vals_2)
+  list(untreated=vals_u, treated=vals_t)
 }
 
 
-#' Title
+#' Performs between- or within-individual experiments comparing melatonin suppression for
+#' treated and untreated subgroups at a single lux
 #'
-#' @param is_between
-#' @param lux
-#' @param n
-#' @param population_df
-#' @param p_value
+#' For a between-individual comparison, a t-test comparing the melatonin suppression level
+#' at a single lux is conducted on two subgroups (untreated and treated) comprising different
+#' sets of individuals.
 #'
-#' @return
+#' For a within-individual comparison, a paired t-test comparing the melatonin suppression level
+#' at a single lux level for a set of individuals before and after they are treated is conducted.
+#'
+#' This function requires based an (ideally large) simulated population of individual dose-response data.
+#'
+#' @inheritParams comparison_test
+#' @inheritParams generate_two_samples_at_one_lux
+#'
+#' @return @return a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign
 #' @export
 #'
 #' @examples
