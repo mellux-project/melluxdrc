@@ -76,6 +76,26 @@ is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit, p_value)
   res
 }
 
+#' Performs t test between two sets of values
+#'
+#' Ensures that tests are conducted assuming paired values if required
+#'
+#' @inheritParams generate_two_samples
+#' @param vals a named list of 'vals_1' and 'vals_2', each of the same length
+#'
+#' @return a list with class "htest" resultant from performing a t.test
+t_test <- function(is_between, vals) {
+  vals_1 <- vals$vals_1
+  vals_2 <- vals$vals_2
+  if(is_between)
+    is_paired <- FALSE
+  else
+    is_paired <- TRUE
+
+  fit <- stats::t.test(vals_1, vals_2, paired=is_paired)
+  fit
+}
+
 #' Performs between- or within-individual experiments comparing melatonin suppression at two
 #' lux levels using t tests
 #'
@@ -115,15 +135,86 @@ is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit, p_value)
 comparison_test <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05) {
 
   vals <- generate_two_samples(is_between, lux_1, lux_2, n, population_df)
-  vals_1 <- vals$vals_1
-  vals_2 <- vals$vals_2
-  if(is_between)
-    is_paired <- FALSE
-  else
-    is_paired <- TRUE
 
-  fit <- stats::t.test(vals_1, vals_2, paired=is_paired)
+  fit <- t_test(is_between, vals)
 
   is_success <- is_comparison_successful(vals_1, vals_2, lux_1, lux_2, fit, p_value=p_value)
+  is_success
+}
+
+#' Create two samples of melatonin suppression observations from an intervention type experiment
+#'
+#' @inheritParams comparison_test
+#' @param lux the lux value at which to conduct the comparison
+#'
+#' @return a list of two sets of measured melatonin values
+generate_two_samples_at_one_lux <- function(is_between, lux, n, population_df) {
+  if(!lux %in% population_df$lux)
+    stop("lux must be in set of luxes in population_df")
+  single_lux_df <- population_df %>%
+    dplyr::filter(.data$lux == lux)
+
+  n_id <- dplyr::n_distinct(single_lux_df$id)
+  if(2 * n > n_id)
+    stop("number of individuals in study must be less than half population size")
+
+  treatment_types <- single_lux_df %>%
+    dplyr::summarise(untreated=sum(!treated),
+                     treated=sum(treated))
+  enough_untreated <- 2 * n > treatment_types$untreated
+  enough_treated <- 2 * n > treatment_types$treated
+  if(!(enough_untreated) | !(enough_treated))
+    stop("insufficient individuals for comparison at that lux (must exceed twice n)")
+
+  if(is_between) {
+    sample_ids <- sample(1:n_id, 2 * n)
+
+    # non-overlapping individuals picked
+    df_untreated <- single_lux_df %>%
+      dplyr::filter(.data$id %in% sample_ids[1:n]) %>%
+      dplyr::filter(!.data$treated)
+    df_treated <- single_lux_df %>%
+      dplyr::filter(.data$id %in% sample_ids[(n + 1):(2 * n)]) %>%
+      dplyr::filter(.data$treated)
+
+  } else{ # within
+    sample_ids <- sample(1:n_id, n)
+
+    # pick individuals and look at treated and untreated obs
+    sample_data <- single_lux_df %>%
+      dplyr::filter(.data$id %in% sample_ids)
+
+    df_untreated <- sample_data %>%
+      dplyr::filter(!.data$treated)
+    df_treated <- sample_data %>%
+      dplyr::filter(.data$treated)
+  }
+
+  vals_u <- df_untreated$y
+  vals_t <- df_treated$y
+
+  list(vals_1=vals_1, vals_2=vals_2)
+}
+
+
+#' Title
+#'
+#' @param is_between
+#' @param lux
+#' @param n
+#' @param population_df
+#' @param p_value
+#'
+#' @return
+#' @export
+#'
+#' @examples
+comparison_test_treatment <- function(is_between, lux, n, population_df, p_value=0.05) {
+
+  vals <- generate_two_samples_at_one_lux(is_between, lux, n, population_df)
+
+  fit <- t_test(is_between, vals)
+
+  is_success <- is_comparison_successful_one_lux(vals_1, vals_2, fit, p_value=p_value)
   is_success
 }
