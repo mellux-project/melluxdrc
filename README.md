@@ -14,7 +14,7 @@ Installation
 You can install chronodoseresponse via:
 
 ``` r
-devtools::install_github("ben18785/chronodoseresponse")
+devtools::install_github("https://github.com/melsuppr-power-project/chronodoseresponse")
 ```
 
 Example
