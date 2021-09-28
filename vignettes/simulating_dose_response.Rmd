@@ -64,7 +64,12 @@ lux_2 <- 30
 nindiv <- 5
 nreps <- 30
 is_between <- F
-results <- map_dbl(1:nreps, ~comparison_test(is_between, lux_1, lux_2, nindiv, population_df))
+
+results <- vector(length = nreps)
+for(i in 1:nreps) {
+  result <- comparison_test(is_between, lux_1, lux_2, nindiv, population_df)
+  results[i] <- result$result
+}
 mean(results)
 ```
 

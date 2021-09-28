@@ -58,7 +58,8 @@ generate_two_samples <- function(is_between, lux_1, lux_2, n, population_df) {
 #' @param fit a result of running t.test
 #' @param p_value a statistical test size
 #'
-#' @return a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign
+#' @return a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
+#' and 'p_value': the p-value from the t test
 is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit, p_value) {
   res <- 0
   if(lux_2 > lux_1) {
@@ -73,7 +74,7 @@ is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit, p_value)
     if(fit$p.value > p_value)
       res <- 1
   }
-  res
+  list(result=res, p_value=fit$p.value)
 }
 
 #' Performs t test between two sets of values
@@ -108,7 +109,8 @@ t_test <- function(is_between, vals) {
 #' @inheritParams generate_two_samples
 #' @inheritParams is_comparison_successful
 #'
-#' @return a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign
+#' @return a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
+#' and 'p_value': the p-value from the t test
 #' @export
 #' @importFrom rlang .data
 #'
@@ -118,28 +120,23 @@ t_test <- function(is_between, vals) {
 #' # generate virtual data for 200 individuals
 #' population_df <- virtual_experiment(200)
 #'
-#' # carry out 10 replicate between-individual experiments comparing lux_1=10 with lux_2=30
+#' # carry out between-individual experiment comparing lux_1=10 with lux_2=30
 #' # for a test sample size of 20
 #' is_between <- TRUE
-#' results <- purrr::map_dbl(1:10, ~comparison_test(is_between, 10, 30, 20, population_df))
+#' comparison_test(is_between, 10, 30, 20, population_df)
 #'
-#' # calculate percentage of experiments obtaining the correct signed difference
-#' mean(results)
-#' # carry out 10 replicate within-individual experiments comparing lux_1=10 with lux_2=30
+#' # carry out within-individual experiments comparing lux_1=10 with lux_2=30
 #' # for a test sample size of 20
 #' is_between <- FALSE
-#' results <- purrr::map_dbl(1:10, ~comparison_test(is_between, 10, 30, 20, population_df))
-#'
-#' # calculate percentage of experiments obtaining the correct signed difference
-#' mean(results)
+#' comparison_test(is_between, 10, 30, 20, population_df)
 comparison_test <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05) {
 
   vals <- generate_two_samples(is_between, lux_1, lux_2, n, population_df)
 
   fit <- t_test(is_between, vals)
 
-  is_success <- is_comparison_successful(vals_1, vals_2, lux_1, lux_2, fit, p_value=p_value)
-  is_success
+  is_success_df <- is_comparison_successful(vals$vals_1, vals$vals_2, lux_1, lux_2, fit, p_value=p_value)
+  is_success_df
 }
 
 #' Create two samples of melatonin suppression observations from an intervention type experiment
