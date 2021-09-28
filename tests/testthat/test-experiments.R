@@ -21,44 +21,50 @@ test_that("comparison_test yields reasonable test results", {
   lux_1 <- 10
   lux_2 <- 30
   n <- 20
+  nreps <- 20
 
   # between
   is_between <- TRUE
-  expect_true(comparison_test(is_between, lux_1, lux_2, n, population_df) %in% c(0, 1))
+  results <- comparison_test(is_between, lux_1, lux_2, n, population_df, nreps=nreps)
+  expect_equal(mean(results$result %in% c(0, 1)), 1)
+  expect_equal(nrow(results), nreps)
+  cnames <- colnames(results)
+  cnames_expected <- c("replicate", "result", "p_value")
+  expect_equal(mean(cnames %in% cnames_expected), 1)
 
   # suppose should be easier to detect a difference between more widely spaced
   # lux values
-  nreps <- 20
-  results_short <- purrr::map_dbl(1:nreps, ~comparison_test(is_between, lux_1, lux_2, n, population_df))
-  results_wide <- purrr::map_dbl(1:nreps, ~comparison_test(is_between, lux_1, 2000, n, population_df))
-  expect_true(mean(results_short) <= mean(results_wide))
+  results_short <- comparison_test(is_between, lux_1, lux_2, n, population_df, nreps=nreps)
+  results_wide <- comparison_test(is_between, lux_1, 2000, n, population_df, nreps=nreps)
+  expect_true(mean(results_short$result) <= mean(results_wide$result))
 
   # reverse order of luxes and same result should hold
-  results_short <- purrr::map_dbl(1:nreps, ~comparison_test(is_between, lux_2, lux_1, n, population_df))
-  results_wide <- purrr::map_dbl(1:nreps, ~comparison_test(is_between, 2000, lux_1, n, population_df))
-  expect_true(mean(results_short) <= mean(results_wide))
+  results_short <- comparison_test(is_between, lux_2, lux_1, n, population_df, nreps=nreps)
+  results_wide <- comparison_test(is_between, 2000, lux_1, n, population_df, nreps=nreps)
+  expect_true(mean(results_short$result) <= mean(results_wide$result))
 
   # within
   is_between <- F
-  expect_true(comparison_test(is_between, lux_1, lux_2, n, population_df) %in% c(0, 1))
+  results <- comparison_test(is_between, lux_1, lux_2, n, population_df, nreps=nreps)
+  expect_equal(mean(results$result %in% c(0, 1)), 1)
 
   # suppose should be easier to detect a difference between more widely spaced
   # lux values
   n <- 5
-  results_short <- purrr::map_dbl(1:nreps, ~comparison_test(is_between, lux_1, lux_2, n, population_df))
-  results_wide <- purrr::map_dbl(1:nreps, ~comparison_test(is_between, lux_1, 2000, n, population_df))
-  expect_true(mean(results_short) < mean(results_wide))
+  results_short <- comparison_test(is_between, lux_1, lux_2, n, population_df, nreps=nreps)
+  results_wide <- comparison_test(is_between, lux_1, 2000, n, population_df, nreps=nreps)
+  expect_true(mean(results_short$result) < mean(results_wide$result))
 
   # reverse order of luxes and same result should hold
-  results_short <- purrr::map_dbl(1:nreps, ~comparison_test(is_between, lux_2, lux_1, n, population_df))
-  results_wide <- purrr::map_dbl(1:nreps, ~comparison_test(is_between, 2000, lux_1, n, population_df))
-  expect_true(mean(results_short) < mean(results_wide))
+  results_short <- comparison_test(is_between, lux_2, lux_1, n, population_df, nreps=nreps)
+  results_wide <- comparison_test(is_between, 2000, lux_1, n, population_df, nreps=nreps)
+  expect_true(mean(results_short$result) < mean(results_wide$result))
 
   # comparing within and between
   n <- 10
-  results_b <- purrr::map_dbl(1:nreps, ~comparison_test(T, lux_1, lux_2, n, population_df))
-  results_w <- purrr::map_dbl(1:nreps, ~comparison_test(F, lux_1, lux_2, n, population_df))
+  results_b <- comparison_test(T, lux_1, lux_2, n, population_df, nreps=nreps)
+  results_w <- comparison_test(F, lux_1, lux_2, n, population_df, nreps=nreps)
 
-  expect_true(mean(results_w) >= mean(results_b))
+  expect_true(mean(results_w$result) >= mean(results_b$result))
 })
 

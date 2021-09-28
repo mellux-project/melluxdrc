@@ -97,7 +97,7 @@ t_test <- function(is_between, vals) {
   fit
 }
 
-#' Performs between- or within-individual experiments comparing melatonin suppression at two
+#' Performs a single between- or within-individual experiments comparing melatonin suppression at two
 #' lux levels using t tests
 #'
 #' For a between-individual experiment, a t-test is used to compare the melatonin suppression level at two lux values for two different
@@ -111,6 +111,28 @@ t_test <- function(is_between, vals) {
 #'
 #' @return a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
 #' and 'p_value': the p-value from the t test
+comparison_test_single <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05) {
+
+  vals <- generate_two_samples(is_between, lux_1, lux_2, n, population_df)
+
+  fit <- t_test(is_between, vals)
+
+  is_success_df <- is_comparison_successful(vals$vals_1, vals$vals_2, lux_1, lux_2, fit, p_value=p_value)
+  is_success_df
+}
+
+#' Performs between- or within-individual experiments comparing melatonin suppression at two
+#' lux levels using t tests
+#'
+#' For a between-individual experiment, a t-test is used to compare the melatonin suppression level at two lux values for two different
+#' samples of individuals. This function requires based an (ideally large) simulated population of individual dose-response data.
+#'
+#' For a within-individual, a paired t-test is used to compare the melatonin suppression level at two lux values for a sample of individuals
+#' measured at each of those values. This function requires based an (ideally large) simulated population of individual dose-response data.
+#'
+#' @inheritParams generate_two_samples
+#' @inheritParams is_comparison_successful
+#' @nreps integer indicating number of test replicates (which defaults to 1)
 #' @export
 #' @importFrom rlang .data
 #'
@@ -129,14 +151,16 @@ t_test <- function(is_between, vals) {
 #' # for a test sample size of 20
 #' is_between <- FALSE
 #' comparison_test(is_between, 10, 30, 20, population_df)
-comparison_test <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05) {
+comparison_test <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05, nreps=1) {
 
-  vals <- generate_two_samples(is_between, lux_1, lux_2, n, population_df)
-
-  fit <- t_test(is_between, vals)
-
-  is_success_df <- is_comparison_successful(vals$vals_1, vals$vals_2, lux_1, lux_2, fit, p_value=p_value)
-  is_success_df
+  m_results <- matrix(nrow = nreps, ncol = 3)
+  for(i in 1:nreps) {
+    result <- comparison_test_single(is_between, lux_1, lux_2, n, population_df, p_value)
+    m_results[i, ] <- c(i, result$result, result$p_value)
+  }
+  colnames(m_results) <- c("replicate", "result", "p_value")
+  m_results <- as.data.frame(m_results)
+  m_results
 }
 
 #' Create two samples of melatonin suppression observations from an intervention type experiment
