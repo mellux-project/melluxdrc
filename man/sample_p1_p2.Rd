@@ -10,15 +10,16 @@ sample_p1_p2(n, p1_distribution_parameters, p2_distribution_parameters)
 \item{n}{the number of individual dose-response curves to generate}
 
 \item{p1_distribution_parameters}{a named list of items used to characterise the p1 distribution:
-cdf_full, cdf_inv_full, normal_sigma, weight_full. Here cdf_inv_full and cdf_full are the cdf and inverse-cdf
+cdf_inv_full, normal_sigma, weight_full. Here cdf_inv is the inverse-cdf
 characterising the distribution of p1 distribution from Phillips et al. (2017); normal_sigma is the standard
 deviation of the normal distribution used as the narrow mixture component; weight_full is the weight given to the
 p1_distribution derived from Phillips et al. (2017).}
 
 \item{p2_distribution_parameters}{a named list of items used to characterise the log_p2|p1 distribution. It comprises:
-alpha posteriors draws for the intercept in the regression of log_p2 on p1; beta posterior draws for slope
-parameter in the regression of log_p2 on p1; sigma0 posterior draws for the constant noise term in the regression of log_p2 on p1;
-posterior draws for the heteroscedastic noise term in the regression of log_p2 on p1.}
+"alpha" posteriors draws for the intercept in the regression of log_p2 on p1; "beta" posterior draws for slope
+parameter in the regression of log_p2 on p1; "sigma0" posterior draws for the constant noise term in the regression of log_p2 on p1;
+"sigma1" posterior draws for the heteroscedastic noise term in the regression of log_p2 on p1;
+"weight" a number (0<=weight<=1) used to control the variance reduction in individual heterogeneity.}
 }
 \value{
 a tibble of p1 and p2 values for each individual dose-response curve

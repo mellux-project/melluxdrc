@@ -84,7 +84,7 @@ sample_p1_p2 <- function(n, p1_distribution_parameters, p2_distribution_paramete
     a_beta <- beta[a_idx]
     a_sigma0 <- sigma0[a_idx]
     a_sigma1 <- sigma1[a_idx]
-    p1_temp <- f_sample_n(n=1, cdf_inv)
+    p1_temp <- f_sample_n(n=1, cdf_inv_full)
     p1[i] <-  p1_temp + (p1_middle - p1_temp) * (1 - weight_full)
     sigma_noise <- weight_sigma * (a_sigma0 + a_sigma1 * p1[i])
     p2_log[i] <- stats::rnorm(1, a_alpha + a_beta * p1[i], sigma_noise)

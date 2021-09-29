@@ -9,7 +9,7 @@ virtual_experiment(
   lux = c(10, 30, 50, 100, 200, 400, 2000),
   thresh_25 = 0.5,
   thresh_75 = 1.5,
-  individual_variation_reduction = 1,
+  individual_variation_level = 1,
   treated_ed50_multiplier = 1
 )
 }
@@ -22,7 +22,8 @@ virtual_experiment(
 
 \item{thresh_75}{upper bound on simulated ed75 vs observed ed75 (bound calculated as thresh_75 * observed)}
 
-\item{individual_variation_reduction}{a value (0<=value<=1) which reduces individual variability in dose-response curves}
+\item{individual_variation_level}{a value (0<=value<=1) dictating individual variability in dose-response curves. Here a value of 1 indicates
+the level of variation seen in raw data; 0 indicates no individual variation}
 
 \item{treated_ed50_multiplier}{a value which multiplies natural ed50 to result in a treated ed50 = natural ed50 * treated_ed50_multiplier}
 }

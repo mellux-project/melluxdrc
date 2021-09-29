@@ -22,7 +22,7 @@ virtual_population(
 
 \item{weight_p1}{the weight (0<=weight<=1) given to the purely empirical distribution of p1 derived from Phillips et al. (2017)}
 
-\item{weight_sigma}{the weight (0<=weight<=1) specifying factor to suppress the estimated standard deviation of p2_log|p1}
+\item{weight_sigma}{the weight (0<=weight<=1) specifying the factor to suppress the estimated standard deviation of p2_log|p1}
 
 \item{normal_sigma}{the standard deviation of the normal mixture distrution used to characterise p1}
 }

@@ -4,14 +4,16 @@
 \name{p1_p2_regression_draws}
 \alias{p1_p2_regression_draws}
 \title{Posterior parameter draws for regression model of (log-p2) on p1.}
-\format{A list with 4000 parameter draws for each of:
+\format{
+A list with 4000 parameter draws for each of:
 \describe{
 \item{alpha}{intercept parameter}
 \item{beta}{slope parameter}
 \item{sigma0}{noise intercept parameter}
 \item{sigma1}{noise slope parameter}
 ...
-}}
+}
+}
 \usage{
 p1_p2_regression_draws
 }
