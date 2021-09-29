@@ -4,14 +4,7 @@
 \alias{virtual_population}
 \title{Generates a population of individual dose-response curves}
 \usage{
-virtual_population(
-  n,
-  thresh_25,
-  thresh_75,
-  weight_p1,
-  weight_sigma,
-  normal_sigma
-)
+virtual_population(n, thresh_25, thresh_75, weight_p1, weight_p2)
 }
 \arguments{
 \item{n}{number of individual dose-response curves to generate}
@@ -20,11 +13,9 @@ virtual_population(
 
 \item{thresh_75}{upper bound on simulated ed75 vs observed ed75 (bound calculated as thresh_75 * observed)}
 
-\item{weight_p1}{the weight (0<=weight<=1) given to the purely empirical distribution of p1 derived from Phillips et al. (2017)}
+\item{weight_p1}{the weight (0<=weight<=1) of the purely empirical distribution of p1 derived from Phillips et al. (2017)}
 
-\item{weight_sigma}{the weight (0<=weight<=1) specifying the factor to suppress the estimated standard deviation of p2_log|p1}
-
-\item{normal_sigma}{the standard deviation of the normal mixture distrution used to characterise p1}
+\item{weight_p2}{the weight (0<=weight<=1) specifying the factor to suppress variation in p2_log|p1}
 }
 \value{
 a tibble with n rows with pairs of logistic_2 dose-response parameters

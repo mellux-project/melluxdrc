@@ -120,7 +120,7 @@ test_that("valid_individual returns individual with ed25 and ed75 within thresho
 
 test_that("virtual_population generates population of correct size", {
   n <- 10
-  df <- virtual_population(n, 0.1, 2, 0.5, 0.5, 0.025)
+  df <- virtual_population(n, 0.1, 2, 0.5, 0.5)
   expect_equal(nrow(df), n)
 })
 
@@ -133,7 +133,7 @@ test_that("virtual_population generates individuals all with ed25s and ed75s wit
   lower <- lower_thres * min(eds_25)
   upper <- upper_thres * max(eds_75)
 
-  df <- virtual_population(n, lower_thres, upper_thres, 1, 1, 0.05)
+  df <- virtual_population(n, lower_thres, upper_thres, 1, 1)
   count_lower <- 0
   count_upper <- 0
   for(i in 1:nrow(df)) {
