@@ -1,4 +1,13 @@
 population_df <- virtual_experiment(200)
+population_df_treat_lowered50 <- virtual_experiment(200,
+                                                    treated_ed50_multiplier=0.2) %>%
+  dplyr::mutate(treated=TRUE)
+population_df_treat_lowered50_1 <- virtual_experiment(200,
+                                                    treated_ed50_multiplier=0.8) %>%
+  dplyr::mutate(treated=TRUE)
+population_df_treat_highered50 <- virtual_experiment(200,
+                                                     treated_ed50_multiplier=5) %>%
+  dplyr::mutate(treated=TRUE)
 
 test_that("generate_two_samples generates appropriate samples", {
   lux_1 <- 100
@@ -68,3 +77,50 @@ test_that("comparison_test yields reasonable test results", {
   expect_true(mean(results_w$result) >= mean(results_b$result))
 })
 
+test_that("comparison_test_treatment works as desired" , {
+  population_df_treat_lowered50 <- population_df_treat_lowered50 %>%
+    dplyr::bind_rows(population_df %>%
+                     dplyr::mutate(treated=FALSE))
+  population_df_treat_lowered50_1 <- population_df_treat_lowered50_1 %>%
+    dplyr::bind_rows(population_df %>%
+                     dplyr::mutate(treated=FALSE))
+  population_df_treat_highered50 <- population_df_treat_highered50 %>%
+    dplyr::bind_rows(population_df %>%
+                     dplyr::mutate(treated=FALSE))
+
+  # when the ed50 is lower the response should be higher at a given lux
+  nreps <- 20
+  lux <- 10
+  n <- 10
+  is_between <- TRUE
+  is_treated_higher <- TRUE
+  results <- comparison_test_treatment(
+    is_between, lux, n, population_df_treat_lowered50,
+    is_treated_higher, nreps=nreps)
+  expect_equal(mean(results$result %in% c(0, 1)), 1)
+  expect_equal(nrow(results), nreps)
+  cnames <- colnames(results)
+  cnames_expected <- c("replicate", "result", "p_value")
+  expect_equal(mean(cnames %in% cnames_expected), 1)
+
+  # mistakenly flip sign and check that test results change
+  is_treated_higher <- FALSE
+  results_wrong <- comparison_test_treatment(
+    is_between, lux, n, population_df_treat_lowered50,
+    is_treated_higher, nreps=nreps)
+  expect_true(mean(results$result) > mean(results_wrong$result))
+
+  # same but for case where treatment is weaker
+  is_treated_higher <- TRUE
+  results_weak <- comparison_test_treatment(
+    is_between, lux, n, population_df_treat_lowered50_1,
+    is_treated_higher, nreps=nreps)
+  expect_true(mean(results$result) > mean(results_weak$result))
+
+  # when the ed50 is higher the response should be lower at a given lux
+  is_treated_higher <- FALSE
+  results_high <- comparison_test_treatment(
+    is_between, lux, n, population_df_treat_highered50,
+    is_treated_higher, nreps=nreps)
+  expect_true(mean(results_high$result) > 0)
+})

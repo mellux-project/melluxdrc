@@ -132,7 +132,9 @@ comparison_test_single <- function(is_between, lux_1, lux_2, n, population_df, p
 #'
 #' @inheritParams generate_two_samples
 #' @inheritParams is_comparison_successful
-#' @nreps integer indicating number of test replicates (which defaults to 1)
+#' @param nreps integer indicating number of test replicates (which defaults to 1)
+#'
+#' @return a dataframe where each row corresponds to a test result in a replicate
 #' @export
 #' @importFrom rlang .data
 #'
@@ -169,21 +171,24 @@ comparison_test <- function(is_between, lux_1, lux_2, n, population_df, p_value=
 #' @param lux the lux value at which to conduct the comparison
 #'
 #' @return a list of two sets of measured melatonin values
+#' @importFrom rlang .data
 generate_two_samples_at_one_lux <- function(is_between, lux, n, population_df) {
   if(!lux %in% population_df$lux)
     stop("lux must be in set of luxes in population_df")
+  lux_1 <- lux
   single_lux_df <- population_df %>%
-    dplyr::filter(.data$lux == lux)
+    dplyr::filter(.data$lux == lux_1)
 
   n_id <- dplyr::n_distinct(single_lux_df$id)
   if(2 * n > n_id)
     stop("number of individuals in study must be less than half population size")
 
   treatment_types <- single_lux_df %>%
-    dplyr::summarise(untreated=sum(!treated),
-                     treated=sum(treated))
-  enough_untreated <- 2 * n > treatment_types$untreated
-  enough_treated <- 2 * n > treatment_types$treated
+    dplyr::summarise(untreated=sum(!.data$treated),
+                     treated=sum(.data$treated))
+
+  enough_untreated <- treatment_types$untreated >  2 * n
+  enough_treated <- treatment_types$treated >  2 * n
   if(!(enough_untreated) | !(enough_treated))
     stop("insufficient individuals for comparison at that lux (must exceed twice n)")
 
@@ -217,6 +222,30 @@ generate_two_samples_at_one_lux <- function(is_between, lux, n, population_df) {
   list(untreated=vals_u, treated=vals_t)
 }
 
+#' Determines if a t-test has found a significant difference of the correct sign for a single lux
+#' treated vs untreated experiment
+#'
+#' @param vals_untreated responses for the untreated individuals
+#' @param vals_treated responses for the treated individuals
+#' @param is_treated_higher Boolean indicating whether treated group has a higher response
+#' @inheritParams is_comparison_successful
+#'
+#' @return a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
+#' and 'p_value': the p-value from the t test
+is_comparison_successful_one_lux <- function(vals_untreated, vals_treated, is_treated_higher,
+                                             fit, p_value=p_value) {
+  res <- 0
+  if(is_treated_higher) {
+    if(mean(vals_treated) > mean(vals_untreated))
+      if(fit$p.value < p_value)
+        res <- 1
+  } else {
+    if(mean(vals_treated) < mean(vals_untreated))
+      if(fit$p.value < p_value)
+        res <- 1
+  }
+  list(result=res, p_value=fit$p.value)
+}
 
 #' Performs between- or within-individual experiments comparing melatonin suppression for
 #' treated and untreated subgroups at a single lux
@@ -231,18 +260,77 @@ generate_two_samples_at_one_lux <- function(is_between, lux, n, population_df) {
 #' This function requires based an (ideally large) simulated population of individual dose-response data.
 #'
 #' @inheritParams comparison_test
+#' @param population_treated_df a virtual population data frame with individual who have been treated
+#' and those who have been untreated (where treatment is indicated by a Boolean column named "treated")
 #' @inheritParams generate_two_samples_at_one_lux
+#' @inheritParams is_comparison_successful_one_lux
 #'
-#' @return @return a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign
+#' @return a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign
+comparison_test_treatment_single <- function(is_between, lux, n, population_treated_df, is_treated_higher,
+                                      p_value=0.05) {
+
+  vals <- generate_two_samples_at_one_lux(is_between, lux, n, population_treated_df)
+
+  # todo: fix this hack
+  vals_cop <- list()
+  vals_cop$vals_1 <- vals$untreated
+  vals_cop$vals_2 <- vals$treated
+  fit <- t_test(is_between, vals_cop)
+
+  is_success <- is_comparison_successful_one_lux(
+    vals$untreated, vals$treated, is_treated_higher,
+    fit, p_value=p_value)
+
+  is_success
+}
+
+#' Performs between- or within-individual experiments comparing melatonin suppression for
+#' treated and untreated subgroups at a single lux
+#'
+#' For a between-individual comparison, a t-test comparing the melatonin suppression level
+#' at a single lux is conducted on two subgroups (untreated and treated) comprising different
+#' sets of individuals.
+#'
+#' For a within-individual comparison, a paired t-test comparing the melatonin suppression level
+#' at a single lux level for a set of individuals before and after they are treated is conducted.
+#'
+#' This function requires based an (ideally large) simulated population of individual dose-response data.
+#'
+#' @inheritParams comparison_test_treatment_single
+#' @inheritParams comparison_test
+#'
+#' @return a dataframe where each row corresponds to a test result in a replicate
 #' @export
 #'
 #' @examples
-comparison_test_treatment <- function(is_between, lux, n, population_df, p_value=0.05) {
-
-  vals <- generate_two_samples_at_one_lux(is_between, lux, n, population_df)
-
-  fit <- t_test(is_between, vals)
-
-  is_success <- is_comparison_successful_one_lux(vals_1, vals_2, fit, p_value=p_value)
-  is_success
+#' library(chronodoseresponse)
+#' library(purrr)
+#' library(dplyr)
+#'
+#' # create a population where half are treated; half not
+#' n <- 200
+#' sample_untreated <- virtual_experiment(n) %>%
+#'   mutate(treated=FALSE)
+#' sample_treated <- virtual_experiment(n, treated_ed50_multiplier=0.5) %>%
+#'   mutate(treated=TRUE)
+#' population_df <- sample_untreated %>%
+#'   bind_rows(sample_treated)
+#'
+#' # carry out a within-study test at 10 lux for 30 people
+#' # note that, because the ed50 multiplier for the treated group was
+#' # <1, this group should have a higher response
+#' is_treated_higher <- TRUE
+#' comparison_test_treatment(FALSE, 10, 30, population_df, is_treated_higher)
+comparison_test_treatment <- function(
+  is_between, lux, n, population_treated_df, is_treated_higher,
+  p_value=0.05, nreps=1) {
+  m_results <- matrix(nrow = nreps, ncol = 3)
+  for(i in 1:nreps) {
+    result <- comparison_test_treatment_single(is_between, lux, n, population_treated_df, is_treated_higher,
+                                               p_value)
+    m_results[i, ] <- c(i, result$result, result$p_value)
+  }
+  colnames(m_results) <- c("replicate", "result", "p_value")
+  m_results <- as.data.frame(m_results)
+  m_results
 }

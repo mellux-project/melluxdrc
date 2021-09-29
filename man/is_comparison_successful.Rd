@@ -20,7 +20,8 @@ is_comparison_successful(vals_1, vals_2, lux_1, lux_2, fit, p_value)
 \item{p_value}{a statistical test size}
 }
 \value{
-a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign
+a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
+and 'p_value': the p-value from the t test
 }
 \description{
 Determines if a t-test has found a significant difference of the correct sign

@@ -112,9 +112,9 @@ We first illustrate the two sample case with a treatment which decreases the ed5
 ```{r}
 n <- 200
 sample_untreated <- virtual_experiment(n) %>% 
-  mutate(type="untreated")
+  mutate(treated=FALSE)
 sample_treated <- virtual_experiment(n, treated_ed50_multiplier=0.5) %>% 
-  mutate(type="treated")
+  mutate(treated=TRUE)
 sample_combined <- sample_untreated %>% 
   bind_rows(sample_treated)
 
@@ -122,7 +122,7 @@ sample_combined %>%
   ggplot(aes(x=lux, y=y)) +
   geom_point() +
   geom_line(aes(group=as.factor(id))) +
-  facet_wrap(~type) +
+  facet_wrap(~treated) +
   scale_x_log10() +
   geom_smooth(se=F, method="loess", formula = "y~x") +
   scale_y_continuous(labels=scales::percent) +
