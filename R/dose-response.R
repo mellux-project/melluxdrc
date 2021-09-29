@@ -21,25 +21,6 @@ logistic_noise <- function(sigma, p1, p2,
   df
 }
 
-#' Constructed weighted inverse-cdf from a mixture of a cdf and a normal-cdf
-#'
-#' Takes the cdf of a distribution and combines it with a cdf of a N(mu, sigma)
-#' in a weighted sum: cdf_mixed(x) = cdf(x) weight + normal_cdf(x|mu,sigma) (1-weight).
-#'
-#' @param weight a value (0<=weight<=1) specifying weight given to cdf_full
-#' @param cdf_full the cdf forming first component of mixture
-#' @param mu the mean of the normal distribution component
-#' @param sigma the sd of the normal distribution component
-#' @param p1_vals a set of p1 values used to form mixture cdf
-#'
-#' @return a function yielding the inverse cdf for the mixture distribution
-cdf_inv_constructor <- function(weight, cdf_full, mu, sigma, p1_vals) {
-  cdf_mixed <- function(x) cdf_full(x) * weight + stats::pnorm(x, mu, sigma) * (1 - weight)
-  cdf_vals <- purrr::map_dbl(p1_vals, ~cdf_mixed(.))
-  cdf_mixed_inv <- stats::approxfun(cdf_vals, p1_vals)
-  cdf_mixed_inv
-}
-
 #' Converts p1 assuming treatment that changes ed50 by a multiplier
 #'
 #' @param multiplier indicates new ed50 = old ed50 * multiplier
@@ -58,14 +39,15 @@ treated_p1 <- function(multiplier, old_p1) {
 #'
 #' @param n the number of individual dose-response curves to generate
 #' @param p1_distribution_parameters a named list of items used to characterise the p1 distribution:
-#' cdf_full, cdf_inv_full, normal_sigma, weight_full. Here cdf_inv_full and cdf_full are the cdf and inverse-cdf
+#' cdf_inv_full, normal_sigma, weight_full. Here cdf_inv is the inverse-cdf
 #' characterising the distribution of p1 distribution from Phillips et al. (2017); normal_sigma is the standard
 #' deviation of the normal distribution used as the narrow mixture component; weight_full is the weight given to the
 #' p1_distribution derived from Phillips et al. (2017).
 #' @param p2_distribution_parameters a named list of items used to characterise the log_p2|p1 distribution. It comprises:
-#' alpha posteriors draws for the intercept in the regression of log_p2 on p1; beta posterior draws for slope
-#' parameter in the regression of log_p2 on p1; sigma0 posterior draws for the constant noise term in the regression of log_p2 on p1;
-#' posterior draws for the heteroscedastic noise term in the regression of log_p2 on p1.
+#' "alpha" posteriors draws for the intercept in the regression of log_p2 on p1; "beta" posterior draws for slope
+#' parameter in the regression of log_p2 on p1; "sigma0" posterior draws for the constant noise term in the regression of log_p2 on p1;
+#' "sigma1" posterior draws for the heteroscedastic noise term in the regression of log_p2 on p1;
+#' "weight" a number (0<=weight<=1) used to control the variance reduction in individual heterogeneity.
 #'
 #' @return a tibble of p1 and p2 values for each individual dose-response curve
 #' @importFrom magrittr "%>%"
@@ -73,21 +55,24 @@ sample_p1_p2 <- function(n, p1_distribution_parameters, p2_distribution_paramete
 
   # make p1 inverse-cdf function
   cdf_inv_full <- p1_distribution_parameters$cdf_inv_full
-  cdf_full <- p1_distribution_parameters$cdf_full
   normal_sigma <- p1_distribution_parameters$normal_sigma
   weight_full <- p1_distribution_parameters$weight
 
-  middle_p1 <- cdf_inv_full(0.5)
-  p1_fine <- seq(0, 3.1, 0.01)
-  cdf_inv_mixed <- cdf_inv_constructor(weight_full, cdf_full,
-                                       middle_p1, normal_sigma,
-                                       p1_fine)
+  p1_middle <- cdf_inv_full(0.5)
 
   alpha <- p2_distribution_parameters$alpha
   beta <- p2_distribution_parameters$beta
   sigma0 <- p2_distribution_parameters$sigma0
   sigma1 <- p2_distribution_parameters$sigma1
   weight_sigma <- p2_distribution_parameters$weight
+
+  # shrink variation alpha and beta draws towards grand mean
+  alpha_mean <- mean(alpha)
+  beta_mean <- mean(beta)
+  for(i in seq_along(alpha)) {
+    alpha[i] <- alpha[i] + (alpha_mean - alpha[i]) * (1 - weight_sigma)
+    beta[i] <- beta[i] + (beta_mean - beta[i]) * (1 - weight_sigma)
+  }
 
   ndraws <- length(alpha)
   idx <- sample(ndraws, n, replace = T)
@@ -99,7 +84,8 @@ sample_p1_p2 <- function(n, p1_distribution_parameters, p2_distribution_paramete
     a_beta <- beta[a_idx]
     a_sigma0 <- sigma0[a_idx]
     a_sigma1 <- sigma1[a_idx]
-    p1[i] <- f_sample_n(n=1, cdf_inv_mixed)
+    p1_temp <- f_sample_n(n=1, cdf_inv)
+    p1[i] <-  p1_temp + (p1_middle - p1_temp) * (1 - weight_full)
     sigma_noise <- weight_sigma * (a_sigma0 + a_sigma1 * p1[i])
     p2_log[i] <- stats::rnorm(1, a_alpha + a_beta * p1[i], sigma_noise)
   }
@@ -137,15 +123,14 @@ valid_individual <- function(thresh_25, thresh_75, eds_25, eds_75,
 #' @param thresh_25 lower bound on simulated ed25 vs observed ed25 (bound calculated as thresh_25 * observed)
 #' @param thresh_75 upper bound on simulated ed75 vs observed ed75 (bound calculated as thresh_75 * observed)
 #' @param weight_p1 the weight (0<=weight<=1) given to the purely empirical distribution of p1 derived from Phillips et al. (2017)
-#' @param weight_sigma the weight (0<=weight<=1) specifying factor to suppress the estimated standard deviation of p2_log|p1
+#' @param weight_sigma the weight (0<=weight<=1) specifying the factor to suppress the estimated standard deviation of p2_log|p1
 #' @param normal_sigma the standard deviation of the normal mixture distrution used to characterise p1
 #'
 #' @return a tibble with n rows with pairs of logistic_2 dose-response parameters
 #' @export
 virtual_population <- function(n, thresh_25, thresh_75, weight_p1, weight_sigma, normal_sigma) {
 
-  p1_distribution_parameters<- list(cdf_full = chronodoseresponse::cdf,
-                                    cdf_inv_full = chronodoseresponse::cdf_inv,
+  p1_distribution_parameters<- list(cdf_inv_full = chronodoseresponse::cdf_inv,
                                     normal_sigma = normal_sigma,
                                     weight = weight_p1)
 
@@ -192,7 +177,8 @@ sample_sigma <- function() {
 #'
 #' @inheritParams virtual_population
 #' @inheritParams logistic_noise
-#' @param individual_variation_reduction a value (0<=value<=1) which reduces individual variability in dose-response curves
+#' @param individual_variation_level a value (0<=value<=1) dictating individual variability in dose-response curves. Here a value of 1 indicates
+#' the level of variation seen in raw data; 0 indicates no individual variation
 #' @param treated_ed50_multiplier a value which multiplies natural ed50 to result in a treated ed50 = natural ed50 * treated_ed50_multiplier
 #' @return a tibble containing 'measured' dose-response melatonin curves at each lux value for each individual.
 #' The tibble also contains the simulated natural p1 and p2 values and treated p1 value (which may be the same as the
@@ -204,13 +190,13 @@ sample_sigma <- function() {
 virtual_experiment <- function(n,
                                lux=c(10, 30, 50, 100, 200, 400, 2000),
                                thresh_25=0.5, thresh_75=1.5,
-                               individual_variation_reduction=1,
+                               individual_variation_level=1,
                                treated_ed50_multiplier=1) {
-  if(individual_variation_reduction > 1)
-    stop("individual_variation_reduction must be < 1.")
-  weight_p1 <- individual_variation_reduction
-  weight_sigma <- individual_variation_reduction
-  normal_sigma <- 0.05 # hard code as unlikely a user would want to change
+  if(individual_variation_level > 1)
+    stop("individual_variation_level must be < 1.")
+  weight_p1 <- individual_variation_level
+  weight_sigma <- individual_variation_level
+  normal_sigma <- 0.01 # hard code as unlikely a user would want to change
   pop_df <- virtual_population(n, thresh_25, thresh_75, weight_p1, weight_sigma, normal_sigma)
   for(i in 1:nrow(pop_df)) {
     p1_natural <- pop_df$p1[i]
@@ -250,7 +236,7 @@ virtual_experiment <- function(n,
 #'
 #' @inheritParams virtual_population
 #' @inheritParams logistic_noise
-#' @param individual_variation_reduction a value (0<=value<=1) which reduces individual variability in dose-response curves
+#' @param individual_variation_level a value (0<=value<=1) which reduces individual variability in dose-response curves
 #' @param treated_ed50_multiplier a value which multiplies natural ed50 to result in a treated ed50 = natural ed50 * treated_ed50_multiplier
 #' @return a tibble containing 'measured' dose-response melatonin curves at each lux value for each individual twice: before and after treatment.
 #' The tibble also contains the simulated natural p1 and p2 values and treated p1 value (which may be the same as the
@@ -261,12 +247,12 @@ virtual_experiment <- function(n,
 virtual_within_treatment_experiment <- function(n,
                                lux=c(10, 30, 50, 100, 200, 400, 2000),
                                thresh_25=0.5, thresh_75=1.5,
-                               individual_variation_reduction=1,
+                               individual_variation_level=1,
                                treated_ed50_multiplier=1) {
-  if(individual_variation_reduction > 1)
-    stop("individual_variation_reduction must be < 1.")
-  weight_p1 <- individual_variation_reduction
-  weight_sigma <- individual_variation_reduction
+  if(individual_variation_level > 1)
+    stop("individual_variation_level must be < 1.")
+  weight_p1 <- individual_variation_level
+  weight_sigma <- individual_variation_level
   normal_sigma <- 0.05 # hard code as unlikely a user would want to change
   pop_df <- virtual_population(n, thresh_25, thresh_75, weight_p1, weight_sigma, normal_sigma)
 

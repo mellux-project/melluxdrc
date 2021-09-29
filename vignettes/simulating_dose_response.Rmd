@@ -42,7 +42,7 @@ plot_doseresponse(experimental_data)
 The estimates from Phillips et al. (2017) exhibited substantial inter-individual variability in individuals' response to light. Built into the package, we allow this individual variation to be reduced.
 ```{r}
 experimental_data <- virtual_experiment(n=n, lux=lux,
-                                        individual_variation_reduction=0.05)
+                                        individual_variation_level=0.0)
 plot_doseresponse(experimental_data)
 ```
 

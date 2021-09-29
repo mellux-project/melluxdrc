@@ -44,23 +44,6 @@ test_that("logistic_noise: zero noise reduces to logistic curves", {
   expect_equal(untrue, 0)
 })
 
-test_that("cdf_inv_constructor returns a function with reasonable properties", {
-  middle_p1_value <- cdf_inv(0.5)
-  p1_vals <- seq(0, 3.1, 0.01)
-
-  weight <- 1
-  cdf_inv_mixed <- cdf_inv_constructor(weight, cdf, middle_p1_value, 0.05, p1_vals)
-  expect_true(abs(cdf_inv(0.75) - cdf_inv_mixed(0.75)) < 0.1)
-  expect_true(abs(cdf_inv(0.25) - cdf_inv_mixed(0.25)) < 0.1)
-  expect_true(abs(cdf_inv(0.5) - cdf_inv_mixed(0.5)) < 0.1)
-
-  weight <- 0.5
-  cdf_inv_mixed <- cdf_inv_constructor(weight, cdf, middle_p1_value, 0.05, p1_vals)
-  expect_true(cdf_inv(0.75) > cdf_inv_mixed(0.75))
-  expect_true(cdf_inv(0.15) < cdf_inv_mixed(0.25))
-  expect_true(abs(cdf_inv(0.5) - cdf_inv_mixed(0.5)) < 0.1)
-})
-
 test_that("treated_p1 results in proportional change in ed50", {
   fraction <- 0.75
   old_p1 <- 2
@@ -211,7 +194,7 @@ test_that("virtual_experiment allows reduction of individual variation", {
     dplyr::mutate(type="full")
 
   pop_df_reduced <- virtual_experiment(n=200, lux=c(100, 1000),
-                                       individual_variation_reduction=0.1) %>%
+                                       individual_variation_level=0.1) %>%
     dplyr::group_by(lux) %>%
     dplyr::summarise(y=sd(y)) %>%
     tidyr::pivot_wider(names_from = lux,
@@ -260,7 +243,7 @@ test_that("virtual_experiment allows reduction of individual variation with trea
     dplyr::mutate(type="full")
 
   pop_df_reduced <- virtual_experiment(n=200, lux=c(100, 1000),
-                                       individual_variation_reduction=0.1,
+                                       individual_variation_level=0.1,
                                        treated_ed50_multiplier=0.5) %>%
     dplyr::group_by(lux) %>%
     dplyr::summarise(y=sd(y)) %>%
@@ -299,7 +282,7 @@ test_that("virtual_within_treatment_experiment works fine with individual varian
   expect_equal(nrow(test), 2 * nindiv * n_lux)
   expect_equal(sum(test$treated) / dplyr::n_distinct(test$lux), nindiv)
   test_lower <- virtual_within_treatment_experiment(nindiv, treated_ed50_multiplier=0.5,
-                                                    individual_variation_reduction=0.5) %>%
+                                                    individual_variation_level=0.5) %>%
     dplyr::mutate(type="reduced")
   n_lux <- dplyr::n_distinct(test_lower$lux)
   expect_equal(nrow(test_lower), 2 * nindiv * n_lux)
