@@ -4,13 +4,11 @@
 \name{sigma_fit_draws}
 \alias{sigma_fit_draws}
 \title{Posterior parameter draws for model of sigma}
-\format{
-A list with 4000 parameter draws for each of:
+\format{A list with 4000 parameter draws for each of:
 \describe{
 \item{a}{gamma parameter 1 in Stan definition of distribution}
 \item{b}{gamma parameter 2 in Stan definition of distribution}
-}
-}
+}}
 \usage{
 sigma_fit_draws
 }

@@ -143,7 +143,7 @@ mean(sample_treated$p1_truncated) > 0
 We now show simulated data for individuals whom are measured twice: before and after treatment.
 ```{r}
 n <- 9
-sample_treated <- virtual_within_treatment_experiment(n, treated_ed50_multiplier=0.5)
+sample_treated <- virtual_treatment_experiment(n, treated_ed50_multiplier=0.5)
 
 sample_treated %>% 
   ggplot(aes(x=lux, y=y, colour=treated)) +
@@ -162,7 +162,25 @@ mean(sample_treated$p1_truncated) > 0
 Again it's important to check if treated individuals have parameters resulting in over-extrapolation.
 ```{r}
 # extreme treatment
-sample_treated <- virtual_within_treatment_experiment(n, treated_ed50_multiplier=0.01)
+sample_treated <- virtual_treatment_experiment(n, treated_ed50_multiplier=0.01)
 mean(sample_treated$p1_truncated) > 0
+```
+
+We can also generate treated / untreated data for two separate samples of individuals
+```{r}
+n <- 10
+sample_treated <- virtual_treatment_experiment(n, treated_ed50_multiplier=0.5,
+                                               is_between=TRUE,
+                                               individual_variation_level=0.1)
+
+sample_treated %>% 
+  ggplot(aes(x=lux, y=y, group=id)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~treated) +
+  scale_x_log10() +
+  scale_y_continuous(labels=scales::percent) +
+  xlab("Lux") +
+  ylab("Melatonin suppression")
 ```
 

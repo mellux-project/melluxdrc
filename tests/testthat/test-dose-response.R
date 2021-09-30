@@ -259,9 +259,9 @@ test_that("virtual_experiment allows reduction of individual variation with trea
   expect_equal(mean(pop_df_combined$reduced < pop_df_combined$full), 1)
 })
 
-test_that("virtual_within_treatment_experiment measures before and after treatment", {
+test_that("virtual_treatment_experiment measures before and after treatment", {
   nindiv <- 200
-  test <- virtual_within_treatment_experiment(nindiv, treated_ed50_multiplier=0.5)
+  test <- virtual_treatment_experiment(nindiv, treated_ed50_multiplier=0.5)
   n_lux <- dplyr::n_distinct(test$lux)
   expect_equal(nrow(test), 2 * nindiv * n_lux)
   expect_equal(sum(test$treated) / dplyr::n_distinct(test$lux), nindiv)
@@ -274,14 +274,14 @@ test_that("virtual_within_treatment_experiment measures before and after treatme
   expect_true(mean(df_summary$`TRUE` > df_summary$`FALSE`) > 0.7) # arbitrary cutoff
 })
 
-test_that("virtual_within_treatment_experiment works fine with individual variance reducer", {
+test_that("virtual_treatment_experiment works fine with individual variance reducer", {
   nindiv <- 200
-  test <- virtual_within_treatment_experiment(nindiv, treated_ed50_multiplier=0.5) %>%
+  test <- virtual_treatment_experiment(nindiv, treated_ed50_multiplier=0.5) %>%
     dplyr::mutate(type="full")
   n_lux <- dplyr::n_distinct(test$lux)
   expect_equal(nrow(test), 2 * nindiv * n_lux)
   expect_equal(sum(test$treated) / dplyr::n_distinct(test$lux), nindiv)
-  test_lower <- virtual_within_treatment_experiment(nindiv, treated_ed50_multiplier=0.5,
+  test_lower <- virtual_treatment_experiment(nindiv, treated_ed50_multiplier=0.5,
                                                     individual_variation_level=0.5) %>%
     dplyr::mutate(type="reduced")
   n_lux <- dplyr::n_distinct(test_lower$lux)
@@ -299,4 +299,19 @@ test_that("virtual_within_treatment_experiment works fine with individual varian
   expect_true(mean(df_summary$mu_reduced_TRUE > df_summary$mu_reduced_FALSE) > thresh)
   expect_true(mean(df_summary$sigma_full_TRUE > df_summary$sigma_reduced_TRUE) > thresh)
   expect_true(mean(df_summary$sigma_full_FALSE > df_summary$sigma_reduced_FALSE) > thresh)
+})
+
+test_that("virtual_treatment_experiment works for between-style experiments", {
+  nindiv <- 200
+  test <- virtual_treatment_experiment(nindiv, treated_ed50_multiplier=0.5, is_between=TRUE)
+  n_lux <- dplyr::n_distinct(test$lux)
+  expect_equal(nrow(test), nindiv * n_lux)
+  expect_equal(sum(test$treated) / n_lux, nindiv / 2)
+
+  df_summary <- test %>%
+    dplyr::group_by(treated, lux) %>%
+    dplyr::summarise(y=mean(y), .groups="drop") %>%
+    tidyr::pivot_wider(id_cols=lux, names_from=treated,
+                       values_from=y)
+  expect_true(mean(df_summary$`TRUE` > df_summary$`FALSE`) > 0.7) # arbitrary cutoff
 })

@@ -4,9 +4,7 @@
 \name{cdf_inv}
 \alias{cdf_inv}
 \title{A function representing the inverse-CDF of the p1 estimates from Phillips et al. (2017).}
-\format{
-An object of class \code{function} of length 1.
-}
+\format{An object of class \code{function} of length 1.}
 \usage{
 cdf_inv
 }

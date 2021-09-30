@@ -4,9 +4,7 @@
 \name{cdf}
 \alias{cdf}
 \title{A function representing the CDF of the p1 estimates from Phillips et al. (2017).}
-\format{
-An object of class \code{function} of length 1.
-}
+\format{An object of class \code{function} of length 1.}
 \usage{
 cdf
 }

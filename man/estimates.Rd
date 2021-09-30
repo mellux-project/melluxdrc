@@ -4,8 +4,7 @@
 \name{estimates}
 \alias{estimates}
 \title{Estimates of parameter values from Phillips et al. (2017).}
-\format{
-A data frame with 41 and 8 variables:
+\format{A data frame with 41 and 8 variables:
 \describe{
 \item{id}{individual identifier}
 \item{p1}{log_ed50 estimate for each individual}
@@ -18,8 +17,7 @@ A data frame with 41 and 8 variables:
 \item{ed_25}{25\% ed}
 \item{ed_75}{75\% ed}
 ...
-}
-}
+}}
 \usage{
 estimates
 }

@@ -52,12 +52,7 @@ library(dplyr)
 
 # create a population where half are treated; half not
 n <- 200
-sample_untreated <- virtual_experiment(n) \%>\%
-  mutate(treated=FALSE)
-sample_treated <- virtual_experiment(n, treated_ed50_multiplier=0.5) \%>\%
-  mutate(treated=TRUE)
-population_df <- sample_untreated \%>\%
-  bind_rows(sample_treated)
+population_df <- virtual_treatment_experiment(n, treated_ed50_multiplier=0.5)
 
 # carry out a within-study test at 10 lux for 30 people
 # note that, because the ed50 multiplier for the treated group was

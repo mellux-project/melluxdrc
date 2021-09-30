@@ -218,7 +218,10 @@ virtual_experiment <- function(n,
 }
 
 
-#' Generates data from a virtual experiment where individuals are treated and repeatedly measured
+#' Generates data from a virtual experiment where individuals are treated
+#'
+#' Either the same set of individuals are measured twice: before and after treatment; or one
+#' set of individuals is treated and another is not.
 #'
 #' The model used to generate these experiments comprises two elements: a model representing
 #' the underlying dose-response curves (which is based on a two parameter logistic); and a
@@ -232,32 +235,36 @@ virtual_experiment <- function(n,
 #' @inheritParams logistic_noise
 #' @param individual_variation_level a value (0<=value<=1) which reduces individual variability in dose-response curves
 #' @param treated_ed50_multiplier a value which multiplies natural ed50 to result in a treated ed50 = natural ed50 * treated_ed50_multiplier
+#' @param is_between a Boolean indicating whether experiment is within or between type
 #' @return a tibble containing 'measured' dose-response melatonin curves at each lux value for each individual twice: before and after treatment.
 #' The tibble also contains the simulated natural p1 and p2 values and treated p1 value (which may be the same as the
 #' natural one if the individual is untreated), as well as a Boolean indicating if a patient is treated. There is
 #' also a Boolean indicating if an individual's treated p1 value was manually adjusted to: this likely happens
 #' if applying a treatment that is too extreme.
 #' @export
-virtual_within_treatment_experiment <- function(n,
+virtual_treatment_experiment <- function(n,
                                lux=c(10, 30, 50, 100, 200, 400, 2000),
                                thresh_25=0.5, thresh_75=1.5,
                                individual_variation_level=1,
-                               treated_ed50_multiplier=1) {
+                               treated_ed50_multiplier=1,
+                               is_between=FALSE) {
   if(individual_variation_level > 1)
     stop("individual_variation_level must be < 1.")
   weight_p1 <- individual_variation_level
   weight_p2 <- individual_variation_level
+
   pop_df <- virtual_population(n, thresh_25, thresh_75, weight_p1, weight_p2)
 
   measurement_count <- 1
-  for(i in 1:nrow(pop_df)) {
-    p1_natural <- pop_df$p1[i]
-    p2_temp <- pop_df$p2[i]
-    sigma <- sample_sigma()
+  if(is_between) {
+    for(i in 1: nrow(pop_df)) {
+      p1_natural <- pop_df$p1[i]
+      p2_temp <- pop_df$p2[i]
+      sigma <- sample_sigma()
 
-    for(j in 1:2) {
-      if(j == 1) {
-        treated = FALSE
+      # treat 2nd half
+      if(i <= round(n / 2)) {
+        treated <- FALSE
         p1_temp <- p1_natural
       } else {
         treated = TRUE
@@ -268,6 +275,7 @@ virtual_within_treatment_experiment <- function(n,
         p1_temp <- 0
         p1_truncated <- TRUE
       }
+
       temp <- logistic_noise(sigma, p1_temp, p2_temp, lux) %>%
         dplyr::mutate(id=i,
                       sigma=sigma,
@@ -276,6 +284,7 @@ virtual_within_treatment_experiment <- function(n,
                       p1_treated=p1_temp,
                       p1_truncated=p1_truncated,
                       treated=treated)
+
       if(measurement_count == 1)
         big_df <- temp
       else
@@ -283,6 +292,42 @@ virtual_within_treatment_experiment <- function(n,
 
       measurement_count <- measurement_count + 1
     }
+
+  } else {
+      for(i in 1:nrow(pop_df)) {
+        p1_natural <- pop_df$p1[i]
+        p2_temp <- pop_df$p2[i]
+        sigma <- sample_sigma()
+
+        for(j in 1:2) {
+          if(j == 1) {
+            treated = FALSE
+            p1_temp <- p1_natural
+          } else {
+            treated = TRUE
+            p1_temp <- treated_p1(treated_ed50_multiplier, p1_natural)
+          }
+          p1_truncated <- FALSE
+          if(p1_temp < 0) {
+            p1_temp <- 0
+            p1_truncated <- TRUE
+          }
+          temp <- logistic_noise(sigma, p1_temp, p2_temp, lux) %>%
+            dplyr::mutate(id=i,
+                          sigma=sigma,
+                          p1=p1_natural,
+                          p2=p2_temp,
+                          p1_treated=p1_temp,
+                          p1_truncated=p1_truncated,
+                          treated=treated)
+          if(measurement_count == 1)
+            big_df <- temp
+          else
+            big_df <- big_df %>% dplyr::bind_rows(temp)
+
+          measurement_count <- measurement_count + 1
+        }
+      }
   }
   big_df
 }
