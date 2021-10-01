@@ -192,15 +192,26 @@ generate_two_samples_at_one_lux <- function(is_between, lux, n, population_df) {
   if(!(enough_untreated) | !(enough_treated))
     stop("insufficient individuals for comparison at that lux (must exceed twice n)")
 
+  treated_ids <- single_lux_df %>%
+    dplyr::filter(treated) %>%
+    dplyr::pull(id) %>%
+    unique() %>%
+    sort()
+  untreated_ids <- single_lux_df %>%
+    dplyr::filter(!treated) %>%
+    dplyr::pull(id) %>%
+    unique() %>%
+    sort()
+  treated_ids <- sample(treated_ids, n)
+  untreated_ids <- sample(untreated_ids, n)
   if(is_between) {
-    sample_ids <- sample(1:n_id, 2 * n)
 
     # non-overlapping individuals picked
     df_untreated <- single_lux_df %>%
-      dplyr::filter(.data$id %in% sample_ids[1:n]) %>%
+      dplyr::filter(.data$id %in% untreated_ids) %>%
       dplyr::filter(!.data$treated)
     df_treated <- single_lux_df %>%
-      dplyr::filter(.data$id %in% sample_ids[(n + 1):(2 * n)]) %>%
+      dplyr::filter(.data$id %in% treated_ids) %>%
       dplyr::filter(.data$treated)
 
   } else{ # within

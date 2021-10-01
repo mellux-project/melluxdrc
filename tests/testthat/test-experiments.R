@@ -77,6 +77,25 @@ test_that("comparison_test yields reasonable test results", {
   expect_true(mean(results_w$result) >= mean(results_b$result))
 })
 
+test_that("generate_two_samples_at_one_lux generates reasonable samples", {
+  lux <- 10
+  n <- 10
+
+  is_between <- TRUE
+  pop_df <- virtual_treatment_experiment(n = 50, treated_ed50_multiplier=0.1,
+                                         is_between=is_between)
+  vals <- generate_two_samples_at_one_lux(is_between, lux, n, pop_df)
+  expect_equal(length(vals$untreated), n)
+  expect_equal(length(vals$treated), n)
+
+  is_between <- FALSE
+  pop_df <- virtual_treatment_experiment(n = 50, treated_ed50_multiplier=0.1,
+                                         is_between=is_between)
+  vals <- generate_two_samples_at_one_lux(is_between, lux, n, pop_df)
+  expect_equal(length(vals$untreated), n)
+  expect_equal(length(vals$treated), n)
+})
+
 test_that("comparison_test_treatment works as desired" , {
   population_df_treat_lowered50 <- population_df_treat_lowered50 %>%
     dplyr::bind_rows(population_df %>%
