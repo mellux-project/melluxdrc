@@ -43,13 +43,17 @@ test_that("comparison_test yields reasonable test results", {
 
   # suppose should be easier to detect a difference between more widely spaced
   # lux values
-  results_short <- comparison_test(is_between, lux_1, lux_2, n, population_df, nreps=nreps)
-  results_wide <- comparison_test(is_between, lux_1, 2000, n, population_df, nreps=nreps)
+  results_short <- comparison_test(is_between, lux_1, lux_2, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
+  results_wide <- comparison_test(is_between, lux_1, 2000, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
   expect_true(mean(results_short$result) <= mean(results_wide$result))
 
   # reverse order of luxes and same result should hold
-  results_short <- comparison_test(is_between, lux_2, lux_1, n, population_df, nreps=nreps)
-  results_wide <- comparison_test(is_between, 2000, lux_1, n, population_df, nreps=nreps)
+  results_short <- comparison_test(is_between, lux_2, lux_1, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
+  results_wide <- comparison_test(is_between, 2000, lux_1, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
   expect_true(mean(results_short$result) <= mean(results_wide$result))
 
   # within
@@ -60,19 +64,25 @@ test_that("comparison_test yields reasonable test results", {
   # suppose should be easier to detect a difference between more widely spaced
   # lux values
   n <- 5
-  results_short <- comparison_test(is_between, lux_1, lux_2, n, population_df, nreps=nreps)
-  results_wide <- comparison_test(is_between, lux_1, 2000, n, population_df, nreps=nreps)
+  results_short <- comparison_test(is_between, lux_1, lux_2, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
+  results_wide <- comparison_test(is_between, lux_1, 2000, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
   expect_true(mean(results_short$result) < mean(results_wide$result))
 
   # reverse order of luxes and same result should hold
-  results_short <- comparison_test(is_between, lux_2, lux_1, n, population_df, nreps=nreps)
-  results_wide <- comparison_test(is_between, 2000, lux_1, n, population_df, nreps=nreps)
+  results_short <- comparison_test(is_between, lux_2, lux_1, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
+  results_wide <- comparison_test(is_between, 2000, lux_1, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
   expect_true(mean(results_short$result) < mean(results_wide$result))
 
   # comparing within and between
   n <- 10
-  results_b <- comparison_test(T, lux_1, lux_2, n, population_df, nreps=nreps)
-  results_w <- comparison_test(F, lux_1, lux_2, n, population_df, nreps=nreps)
+  results_b <- comparison_test(T, lux_1, lux_2, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
+  results_w <- comparison_test(F, lux_1, lux_2, n, population_df, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
 
   expect_true(mean(results_w$result) >= mean(results_b$result))
 })
@@ -123,23 +133,28 @@ test_that("comparison_test_treatment works as desired" , {
   expect_equal(mean(cnames %in% cnames_expected), 1)
 
   # mistakenly flip sign and check that test results change
+  results <- results %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
   is_treated_higher <- FALSE
   results_wrong <- comparison_test_treatment(
     is_between, lux, n, population_df_treat_lowered50,
-    is_treated_higher, nreps=nreps)
+    is_treated_higher, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
   expect_true(mean(results$result) > mean(results_wrong$result))
 
   # same but for case where treatment is weaker
   is_treated_higher <- TRUE
   results_weak <- comparison_test_treatment(
     is_between, lux, n, population_df_treat_lowered50_1,
-    is_treated_higher, nreps=nreps)
+    is_treated_higher, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
   expect_true(mean(results$result) > mean(results_weak$result))
 
   # when the ed50 is higher the response should be lower at a given lux
   is_treated_higher <- FALSE
   results_high <- comparison_test_treatment(
     is_between, lux, n, population_df_treat_highered50,
-    is_treated_higher, nreps=nreps)
+    is_treated_higher, nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
   expect_true(mean(results_high$result) > 0)
 })

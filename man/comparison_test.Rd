@@ -5,15 +5,7 @@
 \title{Performs between- or within-individual experiments comparing melatonin suppression at two
 lux levels using t tests}
 \usage{
-comparison_test(
-  is_between,
-  lux_1,
-  lux_2,
-  n,
-  population_df,
-  p_value = 0.05,
-  nreps = 1
-)
+comparison_test(is_between, lux_1, lux_2, n, population_df, nreps = 1)
 }
 \arguments{
 \item{is_between}{a Boolean indicating whether experiment is within or between type}
@@ -26,12 +18,11 @@ comparison_test(
 
 \item{population_df}{a tibble representing a virtual experiment}
 
-\item{p_value}{a statistical test size}
-
 \item{nreps}{integer indicating number of test replicates (which defaults to 1)}
 }
 \value{
-a dataframe where each row corresponds to a test result in a replicate
+a dataframe where each row corresponds to a test result in a replicate; note that 'result' indicates that the difference
+was of the correct sign
 }
 \description{
 For a between-individual experiment, a t-test is used to compare the melatonin suppression level at two lux values for two different

@@ -10,8 +10,7 @@ comparison_test_treatment_single(
   lux,
   n,
   population_treated_df,
-  is_treated_higher,
-  p_value = 0.05
+  is_treated_higher
 )
 }
 \arguments{
@@ -25,8 +24,6 @@ comparison_test_treatment_single(
 and those who have been untreated (where treatment is indicated by a Boolean column named "treated")}
 
 \item{is_treated_higher}{Boolean indicating whether treated group has a higher response}
-
-\item{p_value}{a statistical test size}
 }
 \value{
 a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign

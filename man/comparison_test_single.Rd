@@ -5,14 +5,7 @@
 \title{Performs a single between- or within-individual experiments comparing melatonin suppression at two
 lux levels using t tests}
 \usage{
-comparison_test_single(
-  is_between,
-  lux_1,
-  lux_2,
-  n,
-  population_df,
-  p_value = 0.05
-)
+comparison_test_single(is_between, lux_1, lux_2, n, population_df)
 }
 \arguments{
 \item{is_between}{a Boolean indicating whether experiment is within or between type}
@@ -24,8 +17,6 @@ comparison_test_single(
 \item{n}{number of individuals in sample}
 
 \item{population_df}{a tibble representing a virtual experiment}
-
-\item{p_value}{a statistical test size}
 }
 \value{
 a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;

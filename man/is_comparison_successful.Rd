@@ -4,7 +4,7 @@
 \alias{is_comparison_successful}
 \title{Determines if a t-test has found a significant difference of the correct sign}
 \usage{
-is_comparison_successful(vals_1, vals_2, lux_1, lux_2, fit, p_value)
+is_comparison_successful(vals_1, vals_2, lux_1, lux_2, fit)
 }
 \arguments{
 \item{vals_1}{set of melatonin values at first lux}
@@ -16,8 +16,6 @@ is_comparison_successful(vals_1, vals_2, lux_1, lux_2, fit, p_value)
 \item{lux_2}{second measured lux value}
 
 \item{fit}{a result of running t.test}
-
-\item{p_value}{a statistical test size}
 }
 \value{
 a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;

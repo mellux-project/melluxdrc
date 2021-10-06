@@ -65,7 +65,8 @@ nindiv <- 5
 nreps <- 30
 is_between <- F
 results <- comparison_test(is_between, lux_1, lux_2, nindiv, population_df,
-                           nreps=nreps)
+                           nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
 
 mean(results$result)
 ```
@@ -74,7 +75,8 @@ If we increase the sample size the fraction of successes should increase.
 ```{r}
 nindiv <- 20
 results <- comparison_test(is_between, lux_1, lux_2, nindiv, population_df,
-                           nreps=nreps)
+                           nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
 mean(results$result)
 ```
 
@@ -83,7 +85,8 @@ Similarly if we make the two luxes more separated, the fraction of successes inc
 nindiv <- 5
 lux_2 <- 100
 results <- comparison_test(is_between, lux_1, lux_2, nindiv, population_df,
-                           nreps=nreps)
+                           nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
 mean(results$result)
 ```
 
@@ -97,11 +100,13 @@ lux_2 <- 30
 nindiv <- 20
 nreps <- 30
 results_b <- comparison_test(TRUE, lux_1, lux_2, nindiv, population_df,
-                             nreps=nreps)
+                             nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
 mean(results_b$result)
 
 results_w <- comparison_test(FALSE, lux_1, lux_2, nindiv, population_df,
-                             nreps=nreps)
+                             nreps=nreps) %>%
+    dplyr::mutate(result=dplyr::if_else((result==1) & (p_value < 0.05), 1, 0))
 mean(results_w$result)
 ```
 

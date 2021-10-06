@@ -56,22 +56,18 @@ generate_two_samples <- function(is_between, lux_1, lux_2, n, population_df) {
 #' @param vals_1 set of melatonin values at first lux
 #' @param vals_2 set of melatonin values at second lux
 #' @param fit a result of running t.test
-#' @param p_value a statistical test size
 #'
 #' @return a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
 #' and 'p_value': the p-value from the t test
-is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit, p_value) {
+is_comparison_successful <- function(vals_1, vals_2, lux_1, lux_2, fit) {
   res <- 0
   if(lux_2 > lux_1) {
     if(mean(vals_2) > mean(vals_1))
-      if(fit$p.value < p_value)
         res <- 1
   } else if (lux_2 < lux_1){
     if(mean(vals_2) < mean(vals_1))
-      if(fit$p.value < p_value)
         res <- 1
   } else { # correct detection means no difference detected
-    if(fit$p.value > p_value)
       res <- 1
   }
   list(result=res, p_value=fit$p.value)
@@ -111,13 +107,13 @@ t_test <- function(is_between, vals) {
 #'
 #' @return a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
 #' and 'p_value': the p-value from the t test
-comparison_test_single <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05) {
+comparison_test_single <- function(is_between, lux_1, lux_2, n, population_df) {
 
   vals <- generate_two_samples(is_between, lux_1, lux_2, n, population_df)
 
   fit <- t_test(is_between, vals)
 
-  is_success_df <- is_comparison_successful(vals$vals_1, vals$vals_2, lux_1, lux_2, fit, p_value=p_value)
+  is_success_df <- is_comparison_successful(vals$vals_1, vals$vals_2, lux_1, lux_2, fit)
   is_success_df
 }
 
@@ -134,7 +130,8 @@ comparison_test_single <- function(is_between, lux_1, lux_2, n, population_df, p
 #' @inheritParams is_comparison_successful
 #' @param nreps integer indicating number of test replicates (which defaults to 1)
 #'
-#' @return a dataframe where each row corresponds to a test result in a replicate
+#' @return a dataframe where each row corresponds to a test result in a replicate; note that 'result' indicates that the difference
+#' was of the correct sign
 #' @export
 #' @importFrom rlang .data
 #'
@@ -153,11 +150,11 @@ comparison_test_single <- function(is_between, lux_1, lux_2, n, population_df, p
 #' # for a test sample size of 20
 #' is_between <- FALSE
 #' comparison_test(is_between, 10, 30, 20, population_df)
-comparison_test <- function(is_between, lux_1, lux_2, n, population_df, p_value=0.05, nreps=1) {
+comparison_test <- function(is_between, lux_1, lux_2, n, population_df, nreps=1) {
 
   m_results <- matrix(nrow = nreps, ncol = 3)
   for(i in 1:nreps) {
-    result <- comparison_test_single(is_between, lux_1, lux_2, n, population_df, p_value)
+    result <- comparison_test_single(is_between, lux_1, lux_2, n, population_df)
     m_results[i, ] <- c(i, result$result, result$p_value)
   }
   colnames(m_results) <- c("replicate", "result", "p_value")
@@ -193,13 +190,13 @@ generate_two_samples_at_one_lux <- function(is_between, lux, n, population_df) {
     stop("insufficient individuals for comparison at that lux (must exceed twice n)")
 
   treated_ids <- single_lux_df %>%
-    dplyr::filter(treated) %>%
-    dplyr::pull(id) %>%
+    dplyr::filter(.data$treated) %>%
+    dplyr::pull(.data$id) %>%
     unique() %>%
     sort()
   untreated_ids <- single_lux_df %>%
-    dplyr::filter(!treated) %>%
-    dplyr::pull(id) %>%
+    dplyr::filter(!.data$treated) %>%
+    dplyr::pull(.data$id) %>%
     unique() %>%
     sort()
   treated_ids <- sample(treated_ids, n)
@@ -244,15 +241,13 @@ generate_two_samples_at_one_lux <- function(is_between, lux, n, population_df) {
 #' @return a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
 #' and 'p_value': the p-value from the t test
 is_comparison_successful_one_lux <- function(vals_untreated, vals_treated, is_treated_higher,
-                                             fit, p_value=p_value) {
+                                             fit) {
   res <- 0
   if(is_treated_higher) {
     if(mean(vals_treated) > mean(vals_untreated))
-      if(fit$p.value < p_value)
         res <- 1
   } else {
     if(mean(vals_treated) < mean(vals_untreated))
-      if(fit$p.value < p_value)
         res <- 1
   }
   list(result=res, p_value=fit$p.value)
@@ -277,8 +272,7 @@ is_comparison_successful_one_lux <- function(vals_untreated, vals_treated, is_tr
 #' @inheritParams is_comparison_successful_one_lux
 #'
 #' @return a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign
-comparison_test_treatment_single <- function(is_between, lux, n, population_treated_df, is_treated_higher,
-                                      p_value=0.05) {
+comparison_test_treatment_single <- function(is_between, lux, n, population_treated_df, is_treated_higher) {
 
   vals <- generate_two_samples_at_one_lux(is_between, lux, n, population_treated_df)
 
@@ -290,7 +284,7 @@ comparison_test_treatment_single <- function(is_between, lux, n, population_trea
 
   is_success <- is_comparison_successful_one_lux(
     vals$untreated, vals$treated, is_treated_higher,
-    fit, p_value=p_value)
+    fit)
 
   is_success
 }
@@ -310,7 +304,8 @@ comparison_test_treatment_single <- function(is_between, lux, n, population_trea
 #' @inheritParams comparison_test_treatment_single
 #' @inheritParams comparison_test
 #'
-#' @return a dataframe where each row corresponds to a test result in a replicate
+#' @return a dataframe where each row corresponds to a test result in a replicate; note that 'result' indicates that the difference
+#' was of the correct sign
 #' @export
 #'
 #' @examples
@@ -329,11 +324,10 @@ comparison_test_treatment_single <- function(is_between, lux, n, population_trea
 #' comparison_test_treatment(FALSE, 10, 30, population_df, is_treated_higher)
 comparison_test_treatment <- function(
   is_between, lux, n, population_treated_df, is_treated_higher,
-  p_value=0.05, nreps=1) {
+  nreps=1) {
   m_results <- matrix(nrow = nreps, ncol = 3)
   for(i in 1:nreps) {
-    result <- comparison_test_treatment_single(is_between, lux, n, population_treated_df, is_treated_higher,
-                                               p_value)
+    result <- comparison_test_treatment_single(is_between, lux, n, population_treated_df, is_treated_higher)
     m_results[i, ] <- c(i, result$result, result$p_value)
   }
   colnames(m_results) <- c("replicate", "result", "p_value")

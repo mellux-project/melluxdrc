@@ -11,7 +11,6 @@ comparison_test_treatment(
   n,
   population_treated_df,
   is_treated_higher,
-  p_value = 0.05,
   nreps = 1
 )
 }
@@ -27,12 +26,11 @@ and those who have been untreated (where treatment is indicated by a Boolean col
 
 \item{is_treated_higher}{Boolean indicating whether treated group has a higher response}
 
-\item{p_value}{a statistical test size}
-
 \item{nreps}{integer indicating number of test replicates (which defaults to 1)}
 }
 \value{
-a dataframe where each row corresponds to a test result in a replicate
+a dataframe where each row corresponds to a test result in a replicate; note that 'result' indicates that the difference
+was of the correct sign
 }
 \description{
 For a between-individual comparison, a t-test comparing the melatonin suppression level

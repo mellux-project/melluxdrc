@@ -9,8 +9,7 @@ is_comparison_successful_one_lux(
   vals_untreated,
   vals_treated,
   is_treated_higher,
-  fit,
-  p_value = p_value
+  fit
 )
 }
 \arguments{
@@ -21,8 +20,6 @@ is_comparison_successful_one_lux(
 \item{is_treated_higher}{Boolean indicating whether treated group has a higher response}
 
 \item{fit}{a result of running t.test}
-
-\item{p_value}{a statistical test size}
 }
 \value{
 a named list comprising 'result': a binary value indicating test success (if=1) or failure (if=0) to detect difference of correct sign;
