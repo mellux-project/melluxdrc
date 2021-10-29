@@ -12,7 +12,7 @@ population_df_treat_highered50 <- virtual_experiment(200,
 test_that("generate_two_samples generates appropriate samples", {
   lux_1 <- 100
   lux_2 <- 200
-  nsample <- 20
+  nsample <- 100
   vals_b <- generate_two_samples(T, lux_1, lux_2, nsample, population_df)
   expect_equal(length(vals_b$vals_1), nsample)
   expect_equal(length(vals_b$vals_2), nsample)
@@ -22,6 +22,8 @@ test_that("generate_two_samples generates appropriate samples", {
 
   diff_b <- vals_b$vals_2-vals_b$vals_1
   diff_w <- vals_w$vals_2-vals_w$vals_1
+  print(sd(diff_w))
+  print(sd(diff_b))
   expect_true(sd(diff_w) < sd(diff_b))
 })
 
