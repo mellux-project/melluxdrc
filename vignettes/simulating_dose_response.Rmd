@@ -116,12 +116,7 @@ We now illustrate how this library can be used to simulate treatments which shif
 We first illustrate the two sample case with a treatment which decreases the ed50 of individuals by a factor of 2.
 ```{r}
 n <- 200
-sample_untreated <- virtual_experiment(n) %>% 
-  mutate(treated=FALSE)
-sample_treated <- virtual_experiment(n, treated_ed50_multiplier=0.5) %>% 
-  mutate(treated=TRUE)
-sample_combined <- sample_untreated %>% 
-  bind_rows(sample_treated)
+sample_combined <- virtual_treatment_experiment(n, treated_ed50_multiplier = 0.5)
 
 sample_combined %>% 
   ggplot(aes(x=lux, y=y)) +
@@ -138,7 +133,7 @@ sample_combined %>%
 A note on caution: the model is not able to extrapolate too far away from the measured values of Phillips et al. (2016). If the treatment is too extreme, occasionally, individuals may fall outside our region of confidence. To see this, we include a truncation Boolean which should be checked when doing these treatment-type experiments.
 ```{r}
 # ok treatment
-mean(sample_treated$p1_truncated)
+mean(sample_combined$p1_truncated)
 
 # extreme treatment
 sample_treated <- virtual_experiment(n, treated_ed50_multiplier=0.1)
@@ -171,7 +166,7 @@ sample_treated <- virtual_treatment_experiment(n, treated_ed50_multiplier=0.01)
 mean(sample_treated$p1_truncated) > 0
 ```
 
-We can also generate treated / untreated data for two separate samples of individuals
+We can also generate treated / untreated data for two separate samples of individuals. I.e. here we are doing a between-subjects type experiment.
 ```{r}
 n <- 10
 sample_treated <- virtual_treatment_experiment(n, treated_ed50_multiplier=0.5,
