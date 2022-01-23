@@ -1,5 +1,5 @@
 cff-version: 1.1.0
-message: "If you use this software repository, please cite it using these metadata. If you have used chronodoseresponse for calculations, please cite our article (TBC)."
+message: "If you use this software repository, please cite it using these metadata. If you have used mellux-drc for calculations, please cite our article (TBC)."
 authors:
   - family-names: Spitschan
     given-names: Manuel
@@ -7,4 +7,4 @@ authors:
   - family-names: Lambert
     given-names: Ben
     orcid: https://orcid.org/0000-0003-4274-4158
-title: "chronodoseresponse: allows generation of virtual dose-response populations"
+title: "mellux-drc: Power analysis for human melatonin suppression experiments (main package)"
