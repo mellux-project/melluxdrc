@@ -1,5 +1,5 @@
 Package: mellux_drc
-Title: mellux_drc: Power analysis for human melatonin suppression experiments (main package)
+Title: mellux_drc
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Ben",
