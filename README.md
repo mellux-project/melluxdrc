@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# mellux-drc: mellux-drc: Power analysis for human melatonin suppression experiments (main package)
+# melluxdrc: Power analysis for human melatonin suppression experiments (main package)
 
 <!-- badges: start -->
 
@@ -16,7 +16,7 @@ type data typical in melatonin suppression experiments.
 You can install `melluxdrc` via:
 
 ``` r
-devtools::nstall_github("mellux-project/mellux-drc")
+devtools::install_github("mellux-project/melluxdrc")
 ```
 
 ## Example
