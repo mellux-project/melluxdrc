@@ -34,7 +34,7 @@ devtools::nstall_github("mellux-project/mellux-drc")
 This shows how to generate simulated experimental dose-response data, then plots it.
 
 ```{r example}
-library("mellux-drc")
+library("melluxdrc")
 # generate dose-response data for 41 individuals measured at four lux levels
 experimental_data <- virtual_experiment(n=41, lux=c(1, 10, 100, 1000))
 
