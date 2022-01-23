@@ -20,7 +20,7 @@ This vignette describes how to simulate dose-response data as parameterised usin
 # Simulating data
 Here, we simulate dose-response data for 41 individuals measured at four lux levels.
 ```{r setup}
-library(chronodoseresponse)
+library(melluxdrc)
 library(dplyr)
 library(purrr)
 library(ggplot2)

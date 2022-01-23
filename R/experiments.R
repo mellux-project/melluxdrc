@@ -136,7 +136,7 @@ comparison_test_single <- function(is_between, lux_1, lux_2, n, population_df) {
 #' @importFrom rlang .data
 #'
 #' @examples
-#' library(chronodoseresponse)
+#' library(melluxdrc)
 #'
 #' # generate virtual data for 200 individuals
 #' population_df <- virtual_experiment(200)
@@ -309,7 +309,7 @@ comparison_test_treatment_single <- function(is_between, lux, n, population_trea
 #' @export
 #'
 #' @examples
-#' library(chronodoseresponse)
+#' library(melluxdrc)
 #' library(purrr)
 #' library(dplyr)
 #'

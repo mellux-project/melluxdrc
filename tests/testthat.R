@@ -1,4 +1,4 @@
 library(testthat)
-library(chronodoseresponse)
+library(melluxdrc)
 
-test_check("chronodoseresponse")
+test_check("melluxdrc")

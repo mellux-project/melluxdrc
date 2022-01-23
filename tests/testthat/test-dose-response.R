@@ -65,12 +65,12 @@ test_that("sample_p1_p2 returns (p1, p2) distribution with/without reduced indiv
   n <- 200
 
   weight <- 1
-  p1_distribution_parameters <- list(cdf_full = chronodoseresponse::cdf,
-                                     cdf_inv_full = chronodoseresponse::cdf_inv,
+  p1_distribution_parameters <- list(cdf_full = melluxdrc::cdf,
+                                     cdf_inv_full = melluxdrc::cdf_inv,
                                      normal_sigma = 0.05,
                                      weight = weight)
 
-  p2_distribution_parameters <- chronodoseresponse::p1_p2_regression_draws
+  p2_distribution_parameters <- melluxdrc::p1_p2_regression_draws
   p2_distribution_parameters$weight <- weight
   p1_p2_full_variation <- sample_p1_p2(n, p1_distribution_parameters, p2_distribution_parameters)
   expect_equal(nrow(p1_p2_full_variation), n)
@@ -86,12 +86,12 @@ test_that("sample_p1_p2 returns (p1, p2) distribution with/without reduced indiv
 
 test_that("valid_individual returns individual with ed25 and ed75 within thresholds", {
 
-  p1_distribution_parameters <- list(cdf_full = chronodoseresponse::cdf,
-                                    cdf_inv_full = chronodoseresponse::cdf_inv,
+  p1_distribution_parameters <- list(cdf_full = melluxdrc::cdf,
+                                    cdf_inv_full = melluxdrc::cdf_inv,
                                     normal_sigma = 0.05,
                                     weight = 1)
 
-  p2_distribution_parameters <- chronodoseresponse::p1_p2_regression_draws
+  p2_distribution_parameters <- melluxdrc::p1_p2_regression_draws
   p2_distribution_parameters$weight <- 0.8
 
   eds_25 <- estimates$ed_25
@@ -152,8 +152,8 @@ test_that("sample_sigma produces reasonable sigma values", {
   for(i in 1:n) {
     sigmas[i] <- sample_sigma()
   }
-  a <- chronodoseresponse::sigma_fit_draws$a
-  b <- chronodoseresponse::sigma_fit_draws$b
+  a <- melluxdrc::sigma_fit_draws$a
+  b <- melluxdrc::sigma_fit_draws$b
   mean_sigma <- mean(purrr::map2_dbl(a, b, ~.x/.y))
   expect_true(abs(mean(sigmas) - mean_sigma) < 0.1)
 })

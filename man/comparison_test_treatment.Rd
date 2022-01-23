@@ -44,7 +44,7 @@ at a single lux level for a set of individuals before and after they are treated
 This function requires based an (ideally large) simulated population of individual dose-response data.
 }
 \examples{
-library(chronodoseresponse)
+library(melluxdrc)
 library(purrr)
 library(dplyr)
 

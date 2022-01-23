@@ -33,7 +33,7 @@ For a within-individual, a paired t-test is used to compare the melatonin suppre
 measured at each of those values. This function requires based an (ideally large) simulated population of individual dose-response data.
 }
 \examples{
-library(chronodoseresponse)
+library(melluxdrc)
 
 # generate virtual data for 200 individuals
 population_df <- virtual_experiment(200)

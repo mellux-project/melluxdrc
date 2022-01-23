@@ -126,18 +126,18 @@ valid_individual <- function(thresh_25, thresh_75, eds_25, eds_75,
 #' @export
 virtual_population <- function(n, thresh_25, thresh_75, weight_p1, weight_p2) {
 
-  p1_distribution_parameters<- list(cdf_inv_full = chronodoseresponse::cdf_inv,
+  p1_distribution_parameters<- list(cdf_inv_full = melluxdrc::cdf_inv,
                                     weight = weight_p1)
 
-  p2_distribution_parameters <- chronodoseresponse::p1_p2_regression_draws
+  p2_distribution_parameters <- melluxdrc::p1_p2_regression_draws
   p2_distribution_parameters$weight <- weight_p2
 
   p1 <- vector(length = n)
   p2 <- vector(length = n)
   for(i in seq_along(p1)) {
     indiv <- valid_individual(thresh_25, thresh_75,
-                              chronodoseresponse::estimates$ed_25,
-                              chronodoseresponse::estimates$ed_75,
+                              melluxdrc::estimates$ed_25,
+                              melluxdrc::estimates$ed_75,
                               p1_distribution_parameters, p2_distribution_parameters)
     p1[i] <- indiv$p1[1]
     p2[i] <- indiv$p2[1]
@@ -154,8 +154,8 @@ virtual_population <- function(n, thresh_25, thresh_75, weight_p1, weight_p2) {
 #'
 #' @return a positive value
 sample_sigma <- function() {
-  a <- chronodoseresponse::sigma_fit_draws$a
-  b <- chronodoseresponse::sigma_fit_draws$b
+  a <- melluxdrc::sigma_fit_draws$a
+  b <- melluxdrc::sigma_fit_draws$b
   idx <- sample(1:length(a), size=1)
   a_temp <- a[idx]
   b_temp <- b[idx]
