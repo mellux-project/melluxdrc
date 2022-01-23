@@ -13,20 +13,20 @@ knitr::opts_chunk$set(
 )
 ```
 
-# chronodoseresponse
+# mellux-drc: mellux-drc: Power analysis for human melatonin suppression experiments (main package)
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/ben18785/chronodoseresponse/workflows/R-CMD-check/badge.svg)](https://github.com/ben18785/chronodoseresponse/actions)
+[![R-CMD-check](https://github.com/mellux-project/mellux-drc/workflows/R-CMD-check/badge.svg)](https://github.com/mellux-project/mellux-drc/actions)
 <!-- badges: end -->
 
-The goal of chronodoseresponse is to allow generation of virtual dose-response type data typical in chronobiology experiments.
+The goal of `mellux-drc` is to allow generation of virtual dose-response type data typical in melatonin suppression experiments.
 
 ## Installation
 
-You can install chronodoseresponse via:
+You can install `mellux-drc` via:
 
 ``` r
-install_github("ben18785/chronodoseresponse")
+devtools::nstall_github("mellux-project/mellux-drc")
 ```
 
 ## Example
@@ -34,7 +34,7 @@ install_github("ben18785/chronodoseresponse")
 This shows how to generate simulated experimental dose-response data, then plots it.
 
 ```{r example}
-library(chronodoseresponse)
+library("mellux-drc")
 # generate dose-response data for 41 individuals measured at four lux levels
 experimental_data <- virtual_experiment(n=41, lux=c(1, 10, 100, 1000))
 

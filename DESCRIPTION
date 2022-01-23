@@ -1,5 +1,5 @@
-Package: chronodoseresponse
-Title: What the Package Does (One Line, Title Case)
+Package: mellux-drc
+Title: mellux-drc: Power analysis for human melatonin suppression experiments (main package)
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Ben",
