@@ -1,29 +1,31 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-mellux-drc
-==========
+
+# mellux-drc: mellux-drc: Power analysis for human melatonin suppression experiments (main package)
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/mellux-project/mellux-drc/workflows/R-CMD-check/badge.svg)](https://github.com/mellux-project/mellux-drc/actions) <!-- badges: end -->
 
-The goal of `mellux-drc` is to allow generation of virtual dose-response type data typical in chronobiology experiments. The application is built from data produced in this [modelling analysis](https://github.com/mellux-project/mellux-model_fitting).
+[![R-CMD-check](https://github.com/mellux-project/melluxdrc/workflows/R-CMD-check/badge.svg)](https://github.com/mellux-project/melluxdrc/actions)
+<!-- badges: end -->
 
-Installation
-------------
+The goal of `melluxdrc` is to allow generation of virtual dose-response
+type data typical in melatonin suppression experiments.
 
-You can install `mellux-drc` via:
+## Installation
+
+You can install `melluxdrc` via:
 
 ``` r
-devtools::install_github("https://github.com/mellux-project/mellux-drc")
+devtools::nstall_github("mellux-project/mellux-drc")
 ```
 
-Example
--------
+## Example
 
-This shows how to generate simulated experimental dose-response data, then plots it.
+This shows how to generate simulated experimental dose-response data,
+then plots it.
 
 ``` r
-library(mellux-drc)
+library("melluxdrc")
 # generate dose-response data for 41 individuals measured at four lux levels
 experimental_data <- virtual_experiment(n=41, lux=c(1, 10, 100, 1000))
 

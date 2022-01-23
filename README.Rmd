@@ -16,14 +16,14 @@ knitr::opts_chunk$set(
 # mellux-drc: mellux-drc: Power analysis for human melatonin suppression experiments (main package)
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/mellux-project/mellux-drc/workflows/R-CMD-check/badge.svg)](https://github.com/mellux-project/mellux-drc/actions)
+[![R-CMD-check](https://github.com/mellux-project/melluxdrc/workflows/R-CMD-check/badge.svg)](https://github.com/mellux-project/melluxdrc/actions)
 <!-- badges: end -->
 
-The goal of `mellux-drc` is to allow generation of virtual dose-response type data typical in melatonin suppression experiments.
+The goal of `melluxdrc` is to allow generation of virtual dose-response type data typical in melatonin suppression experiments.
 
 ## Installation
 
-You can install `mellux-drc` via:
+You can install `melluxdrc` via:
 
 ``` r
 devtools::nstall_github("mellux-project/mellux-drc")
