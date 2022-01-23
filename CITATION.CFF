@@ -7,6 +7,6 @@ authors:
   - family-names: Lambert
     given-names: Ben
     orcid: https://orcid.org/0000-0003-4274-4158
-title: "mellux_drc: Power analysis for human melatonin suppression experiments (main package)"
+title: "melluxdrc: Power analysis for human melatonin suppression experiments (main package)"
 date-released: 2021
 version: 1.0.0

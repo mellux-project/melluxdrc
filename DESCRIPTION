@@ -1,5 +1,5 @@
-Package: mellux_drc
-Title: mellux_drc
+Package: melluxdrc
+Title: melluxdrc
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Ben",
