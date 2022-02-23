@@ -45,7 +45,7 @@ plot_doseresponse <- function(experiment_df, plot_curves=TRUE) {
                  width = 0.01, height = 0) +
     scale_x_log10() +
     scale_y_continuous(labels=scales::percent) +
-    xlab("Illuminance [photopic lux]") +
+    xlab("Illuminance [lux]") +
     ylab("Melatonin suppression")
 
   if(!plot_curves)
